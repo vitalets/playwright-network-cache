@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Exit on any error
+set -euo pipefail
+
+if [[ -n "${SKIP_GIT_HOOKS-}" ]]; then exit 0; fi
+
+npx lint-staged --relative

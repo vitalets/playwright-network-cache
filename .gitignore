@@ -1,0 +1,13 @@
+.DS_Store
+.vscode
+.idea
+
+# npm
+node_modules
+npm-debug.log
+
+# my
+/dist
+test-results
+playwright-report
+/todo.txt

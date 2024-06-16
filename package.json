@@ -1,0 +1,58 @@
+{
+  "name": "playwright-network-cache",
+  "description": "Cache network requests in Playwright tests",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "tsc": "tsc",
+    "knip": "knip -c knip.config.ts",
+    "prettier": "prettier --check --ignore-unknown .",
+    "prettier:w": "prettier --write --ignore-unknown .",
+    "test": "npx playwright test",
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "release": "bash scripts/release.sh"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/js": "9.2.0",
+    "@playwright/test": "1.37.1",
+    "@types/node": "^18.15.0",
+    "eslint": "8.57.0",
+    "eslint-plugin-playwright": "1.6.2",
+    "globals": "15.3.0",
+    "knip": "5.17.3",
+    "lint-staged": "15.2.5",
+    "np": "10.0.5",
+    "prettier": "3.2.5",
+    "publint": "0.2.8",
+    "ts-node": "^10.9.2",
+    "typescript": "5.4.5",
+    "typescript-eslint": "7.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vitalets/playwright-network-cache.git"
+  },
+  "keywords": [
+    "playwright",
+    "network",
+    "cache",
+    "testing",
+    "e2e"
+  ],
+  "funding": "https://github.com/sponsors/vitalets",
+  "license": "MIT"
+}
