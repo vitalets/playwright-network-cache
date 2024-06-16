@@ -22,6 +22,8 @@
     "prettier": "prettier --check --ignore-unknown .",
     "prettier:w": "prettier --write --ignore-unknown .",
     "test": "npx playwright test",
+    "example": "npx playwright test -c example",
+    "example:nocache": "NETWORK_CACHE=off npm run example",
     "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
