@@ -1,5 +1,5 @@
 export function isJsonResponse(headers: Record<string, string>) {
-  return headers['content-type'] === 'application/json';
+  return headers['content-type']?.includes('application/json');
 }
 
 export function prettifyJson(data: string | Record<string, unknown>) {

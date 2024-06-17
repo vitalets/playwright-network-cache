@@ -44,6 +44,6 @@ async function serveIndex(res: http.ServerResponse) {
 
 async function serverApi(res: http.ServerResponse) {
   res.statusCode = 200;
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(cats));
 }
