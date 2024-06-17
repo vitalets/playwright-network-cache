@@ -69,8 +69,13 @@ test('test', async ({ page }) => {
 });
 ```
 
-## Performance
-Lets measure performance impact of `playwright-network-cache` on a simple app in `example` directory. It is a single page that requests data from server with synthetic 2 seconds delay. There are 3 e2e tests emulating check of different scenarios.
+## Showcase
+Measurements performed on a simple app located in `example` directory.
+Adding `playwright-network-cache` reduced test time from **10 seconds** to **2 seconds**. 
+
+The app is a single web-page that requests data from server. Server responds with 2 seconds delay. 
+
+There are 3 tests emulating check of different scenarios.
 
 Running tests without cache takes about **10 seconds**:
 ```
