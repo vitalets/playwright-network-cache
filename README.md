@@ -110,6 +110,9 @@ Running 3 tests using 1 worker
   3 passed (2.1s)
 ```
 
+## Alternatives
+There is alternative package [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) that does many the same things but relies on HAR format.
+
 ## Feedback
 Feel free to share your feedback and suggestions in [issues](https://github.com/vitalets/playwright-network-cache/issues).
 
