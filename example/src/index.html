@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cat Info</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .cat-list {
+        list-style-type: none;
+        padding: 0;
+      }
+      .cat-item {
+        border: 1px solid #ddd;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        display: none;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to the Cat Info Page</h1>
+    <p>This is a simple page serving cat information.</p>
+    <button id="fetch-cats-button">Fetch Cats</button>
+    <div id="loader" class="loader"></div>
+    <h2>Cat List</h2>
+    <ul class="cat-list" id="cat-list"></ul>
+
+    <script>
+      async function fetchCatData() {
+        const loader = document.getElementById('loader');
+        const catList = document.getElementById('cat-list');
+
+        try {
+          loader.style.display = 'block'; // Show loader
+          const response = await fetch('/api/cats');
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const cats = await response.json();
+          catList.innerHTML = ''; // Clear existing cat list
+          cats.forEach((cat) => {
+            const listItem = document.createElement('li');
+            listItem.className = 'cat-item';
+            listItem.textContent = `Name: ${cat.name}, Breed: ${cat.breed}, Age: ${cat.age}`;
+            catList.appendChild(listItem);
+          });
+        } catch (error) {
+          console.error('Fetch error:', error);
+        } finally {
+          loader.style.display = 'none'; // Hide loader
+        }
+      }
+
+      // Add event listener to the button
+      document.getElementById('fetch-cats-button').addEventListener('click', fetchCatData);
+    </script>
+  </body>
+</html>

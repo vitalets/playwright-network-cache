@@ -4,12 +4,11 @@ const baseURL = 'http://localhost:4000';
 
 export default defineConfig({
   testDir: 'test',
-  reporter: 'line',
   use: {
-    baseURL
+    baseURL,
   },
   webServer: {
-    command: 'npx ts-node ./server',
+    command: 'npx ts-node ./src',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },

@@ -1,12 +1,13 @@
 import { defineConfig } from '@playwright/test';
 
+process.env.NETWORK_CACHE_DIR = 'test/.network-cache';
+
 const baseURL = 'http://localhost:3000';
 
 export default defineConfig({
   testDir: 'test',
-  reporter: 'line',
   use: {
-    baseURL
+    baseURL,
   },
   webServer: {
     command: 'npx ts-node test/server',

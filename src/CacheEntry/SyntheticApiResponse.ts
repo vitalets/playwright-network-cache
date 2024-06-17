@@ -1,5 +1,5 @@
 import { APIResponse } from '@playwright/test';
-import { ResponseInfo } from './types';
+import { ResponseInfo } from '../types';
 
 export class SyntheticApiResponse implements APIResponse {
   constructor(

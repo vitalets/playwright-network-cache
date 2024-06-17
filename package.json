@@ -21,10 +21,11 @@
     "knip": "knip -c knip.config.ts",
     "prettier": "prettier --check --ignore-unknown .",
     "prettier:w": "prettier --write --ignore-unknown .",
-    "test": "npx playwright test",
+    "test": "rm -rf test/.network-cache && npx playwright test",
     "example": "npx playwright test -c example",
+    "example:initcache": "rm -rf .network-cache && npm run example",
     "example:nocache": "NETWORK_CACHE=off npm run example",
-    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
   "devDependencies": {

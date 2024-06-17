@@ -4,7 +4,7 @@ import path from 'path';
 
 const PORT = 3000;
 
-interface Cat {
+export interface Cat {
   id: number;
   name: string;
   breed: string;

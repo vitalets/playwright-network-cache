@@ -18,7 +18,7 @@ const cats: Cat[] = [
 ];
 
 // Function to create a delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const server = http.createServer(async (req, res) => {
   if (req.url === '/' && req.method === 'GET') {
