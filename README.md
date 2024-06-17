@@ -1,5 +1,5 @@
 # playwright-network-cache
-Cache network requests for faster Playwright testing.
+Cache network requests for faster [Playwright](https://playwright.dev/) tests.
 
 ## Features
 
@@ -18,6 +18,11 @@ Example file structure of cached API request to `https://example.com/api-cats`:
         └── GET
             ├── headers.json
             └── body.json
+```
+## Installation
+Install from npm:
+```
+npm i -D playwright-network-cache
 ```
 
 ## Usage
@@ -99,6 +104,9 @@ Running 3 tests using 1 worker
 
   3 passed (2.1s)
 ```
+
+## Feedback
+Feel free to share your feedback and suggestions in [issues](https://github.com/vitalets/playwright-network-cache/issues).
 
 ## License
 [MIT](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
