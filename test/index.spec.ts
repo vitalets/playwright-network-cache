@@ -9,6 +9,15 @@ test('routeWithCache', async ({ page }) => {
   await expect(page.getByRole('list')).toContainText('Whiskers');
 });
 
+test('routeWithCache (custom key)', async ({ page }) => {
+  await page.goto('/');
+  await routeWithCache(page, '/api/cats', {
+    cacheKey: (req) => ['custom-key', req.method()],
+  });
+  await page.getByRole('button', { name: 'Fetch Cats' }).click();
+  await expect(page.getByRole('list')).toContainText('Whiskers');
+});
+
 test('fetchWithCache', async ({ page }) => {
   await page.goto('/');
   await page.route('/api/cats', async (route) => {

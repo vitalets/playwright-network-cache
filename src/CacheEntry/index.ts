@@ -65,6 +65,10 @@ export class CacheEntry {
     const cacheKey = this.buildCacheKey();
     if (!cacheKey) return '';
 
+    if (cacheKey.some((part) => !part)) {
+      throw new Error(`CacheKey contains empty value: ${JSON.stringify(cacheKey)}`);
+    }
+
     const sanitizedCacheKey = cacheKey
       .map((part) => filenamify(part.replace(/^\/+/, '')))
       .filter(Boolean);

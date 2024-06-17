@@ -11,7 +11,7 @@ export async function routeWithCache(
   cacheOptions?: CacheOptions,
 ) {
   await page.route(url, async (route) => {
-    const response = await fetchWithCache(route, undefined, cacheOptions);
+    const response = await fetchWithCache(route, null, cacheOptions);
     await route.fulfill({
       status: response.status(),
       headers: response.headers(),
