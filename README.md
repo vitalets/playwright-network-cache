@@ -4,8 +4,8 @@ Cache network requests for faster [Playwright](https://playwright.dev/) tests.
 ## Features
 
 * requests are cached in separate files on file-system
-* file paths (= cacheKeys) are fully customizable, you control what and how to cache (related [playwright#21405](https://github.com/microsoft/playwright/issues/21405), [playwright#30754](https://github.com/microsoft/playwright/issues/30754))
-* modify cached responses as normal ones (see [playwright#29190](https://github.com/microsoft/playwright/issues/29190))
+* file paths (= cacheKeys) are fully customizable, you control what and how to cache (see [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754))
+* modify cached responses as normal ones (see [#29190](https://github.com/microsoft/playwright/issues/29190))
 * JSON responses are pretty formatted, you can inspect it for debugging
 * cache is persistent between test-runs, duration is configurable 
 
