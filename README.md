@@ -50,6 +50,7 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
+> By default cacheKey is: `hostname` + `pathname` + `method` + `query`. See [implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/config.ts#L15).
 
 To cache route **with** modifying the response use `fetchWithCache` (that is similar to `route.fetch`):
 ```ts
