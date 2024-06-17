@@ -1,6 +1,7 @@
 import http from 'http';
 import fs from 'fs/promises';
 import path from 'path';
+import timers from 'timers/promises';
 
 const PORT = 4000;
 
@@ -17,15 +18,12 @@ const cats: Cat[] = [
   { id: 3, name: 'Shadow', breed: 'Russian Blue', age: 4 },
 ];
 
-// Function to create a delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const server = http.createServer(async (req, res) => {
   if (req.url === '/' && req.method === 'GET') {
     await serveIndex(res);
   } else if (req.url === '/api/cats' && req.method === 'GET') {
     // Add a delay of 2 seconds before sending the response
-    await delay(2000);
+    await timers.setTimeout(2000);
     await serverApi(res);
   } else {
     res.statusCode = 404;
