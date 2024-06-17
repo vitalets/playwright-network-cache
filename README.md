@@ -26,7 +26,7 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-Cache route **without** modifying the response:
+For caching route **without** modifying the response use `routeWithCache`:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
@@ -37,11 +37,24 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
-
-Cache route **with** modifying the response:
+You can fully customize cacheKey - array of strings that will produce cache  directory for that request:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
+
+test('test', async ({ page }) => {
+  await routeWithCache(page, '/api/cats', {
+    cacheKey: (req) => ['some-prefix', req.method()],
+  });
+  await page.goto('/');
+  // ...
+});
+```
+
+To cache route **with** modifying the response use `fetchWithCache` (that is similar to `route.fetch`):
+```ts
+import { test } from '@playwright/test';
+import { fetchWithCache } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
   await page.route('/api/cats', async (route) => {
@@ -54,15 +67,19 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
-
-Customize caching key:
+You can also customize cacheKey:
 ```ts
 import { test } from '@playwright/test';
-import { routeWithCache } from 'playwright-network-cache';
+import { fetchWithCache } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
-  await routeWithCache(page, '/api/cats', {
-    cacheKey: (req) => ['custom-key', req.method()],
+  await page.route('/api/cats', async (route) => {
+    const res = await fetchWithCache(route, null, {
+      cacheKey: (req) => ['some-prefix', req.method()],
+    });
+    const json = (await res.json()) as Cat[];
+    json[0].name = 'Kitty';
+    await route.fulfill({ json });
   });
   await page.goto('/');
   // ...
@@ -70,7 +87,7 @@ test('test', async ({ page }) => {
 ```
 
 ## Showcase
-Performance impact was measured on a simple app located in `example` directory.
+Performance impact was measured on a simple app provided in `example` directory.
 Adding `playwright-network-cache` reduced test time from **10 seconds** to **2 seconds**. 
 
 The app is a single web-page that requests data from server. Server responds with 2 seconds delay. 
@@ -99,7 +116,7 @@ Running 3 tests using 1 worker
   3 passed (5.1s)
 ```
 
-Subsequent run of tests takes only **2 seconds**:
+Subsequent run of tests takes only **2 seconds**, because all requests are served from cache:
 ```
 Running 3 tests using 1 worker
 
