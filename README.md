@@ -70,7 +70,7 @@ test('test', async ({ page }) => {
 ```
 
 ## Showcase
-Measurements performed on a simple app located in `example` directory.
+Performance impact was measured on a simple app located in `example` directory.
 Adding `playwright-network-cache` reduced test time from **10 seconds** to **2 seconds**. 
 
 The app is a single web-page that requests data from server. Server responds with 2 seconds delay. 
