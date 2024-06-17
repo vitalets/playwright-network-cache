@@ -10,7 +10,7 @@ Cache network requests for faster [Playwright](https://playwright.dev/) tests.
 * cache is persistent between test-runs, duration is configurable 
 
 ## Cache structure
-Example of cache structure for GET request `https://example.com/api-cats`:
+Example of cache directory structure for GET request `https://example.com/api-cats`:
 ```
 .network-cache
 └── example.com
