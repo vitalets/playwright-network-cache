@@ -18,6 +18,13 @@ test('routeWithCache (custom key)', async ({ page }) => {
   await expect(page.getByRole('list')).toContainText('Whiskers');
 });
 
+test('routeWithCache (context)', async ({ page, context }) => {
+  await page.goto('/');
+  await routeWithCache(context, '/api/cats');
+  await page.getByRole('button', { name: 'Fetch Cats' }).click();
+  await expect(page.getByRole('list')).toContainText('Whiskers');
+});
+
 test('fetchWithCache', async ({ page }) => {
   await page.goto('/');
   await page.route('/api/cats', async (route) => {

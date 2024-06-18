@@ -1,4 +1,4 @@
-import { Page, Route } from '@playwright/test';
+import { Page, Route, BrowserContext } from '@playwright/test';
 import { RequestOverrides } from './types';
 import { CacheEntry, CacheOptions } from './CacheEntry';
 import { CACHE_STRATEGY } from './config';
@@ -6,7 +6,7 @@ import { CACHE_STRATEGY } from './config';
 export { CacheOptions };
 
 export async function routeWithCache(
-  page: Page,
+  page: Page | BrowserContext,
   url: Parameters<Page['route']>[0],
   cacheOptions?: CacheOptions,
 ) {
