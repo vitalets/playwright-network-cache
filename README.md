@@ -2,18 +2,19 @@
 [![npm version](https://img.shields.io/npm/v/playwright-network-cache)](https://www.npmjs.com/package/playwright-network-cache)
 [![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
 
-Cache network requests for faster [Playwright](https://playwright.dev/) tests.
+Cache network requests in [Playwright](https://playwright.dev/) tests.
 
 ## Features
 
 * requests are cached in separate files on file-system
-* file paths (= cacheKeys) are fully customizable, you control what and how to cache (see [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754))
-* modify cached responses as normal ones (see [#29190](https://github.com/microsoft/playwright/issues/29190))
-* JSON responses are pretty formatted, you can inspect it for debugging
-* cache is persistent between test-runs, duration is configurable 
+* file path (= cacheKey) is fully customizable, you control what and how to cache (see [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754))
+* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
+* JSON responses are pretty formatted, you can inspect it for debug
+* cache is persistent between test-runs, duration is configurable
+* does not use HAR format
 
 ## Cache structure
-Example of cache directory structure for GET request `https://example.com/api-cats`:
+Example of cache directory structure created for GET request to `https://example.com/api-cats`:
 ```
 .network-cache
 └── example.com
@@ -40,7 +41,7 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
-You can fully customize `cacheKey` - array of strings that will produce cache  directory for that request:
+You can customize `cacheKey` - array of strings that will produce cache  directory for that request:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
@@ -55,7 +56,7 @@ test('test', async ({ page }) => {
 ```
 > By default cacheKey is: `hostname` + `pathname` + `method` + `query`. See [implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/config.ts#L15).
 
-To cache route **with modifying the response**, use `fetchWithCache` (that is similar to `route.fetch`):
+To cache route **with modifying the response**, use `fetchWithCache` (that is similar to [`route.fetch`](https://playwright.dev/docs/api/class-route#route-fetch)):
 ```ts
 import { test } from '@playwright/test';
 import { fetchWithCache } from 'playwright-network-cache';
@@ -92,7 +93,7 @@ test('test', async ({ page }) => {
 
 #### Cache expiration
 By default responses are cached forever, until you manually delete cache files.
-You can cache this behavior by providing `ttlMinutes` option to specific request,
+You can change this behavior by providing `ttlMinutes` option for specific request,
 or setting `NETWORK_CACHE_TTL` globally.
 
 Set cache expiration delay for 1 hour for specific request:
@@ -101,7 +102,7 @@ await routeWithCache(page, '/api/cats', {
   ttlMinutes: 60
 });
 ```
-Set cache expiration delay **globally** for all responses:
+Set cache expiration delay **globally** for all requests:
 ```ts
 // playwright.config.ts
 
@@ -113,10 +114,10 @@ export default defineConfig({
 ```
 
 ## Showcase
-Performance impact was measured on a simple app provided in `example` directory.
+Performance impact was measured on a simple app located in `example` directory.
 Adding `playwright-network-cache` reduced test time from **10 seconds** to **2 seconds**. 
 
-The app is a single web-page that requests data from server. Server responds with 2 seconds delay. 
+The app is a single web-page that requests data from server. Server responds with synthetic 2 seconds delay. 
 
 There are 3 tests emulating check of different scenarios.
 
