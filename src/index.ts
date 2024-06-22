@@ -1,6 +1,6 @@
 import { Page, Route, BrowserContext } from '@playwright/test';
 import { RequestOverrides } from './types';
-import { CacheEntry, CacheOptions } from './CacheEntry';
+import { CachedResponse, CacheOptions } from './CachedResponse';
 import { CACHE_STRATEGY } from './config';
 
 export { CacheOptions };
@@ -26,22 +26,23 @@ export async function fetchWithCache(
   overrides?: RequestOverrides | null,
   cacheOptions?: CacheOptions,
 ) {
-  const cacheEntry = new CacheEntry(route.request(), cacheOptions);
+  const cachedResponse = new CachedResponse(route.request(), cacheOptions);
   const getResponseFromServer = () => route.fetch(overrides || undefined);
 
-  if (CACHE_STRATEGY === 'off' || cacheEntry.disabled()) {
+  if (CACHE_STRATEGY === 'off' || cachedResponse.disabled()) {
     return getResponseFromServer();
   }
 
-  if (cacheEntry.exists()) {
-    return cacheEntry.getResponse();
+  if (cachedResponse.exists()) {
+    return cachedResponse.get();
   }
 
-  const response = await getResponseFromServer();
-  // checking cache second time, b/c it can be created during fetch
-  if (response.ok() && !cacheEntry.exists()) {
-    await cacheEntry.saveResponse(response);
+  const realResponse = await getResponseFromServer();
+  // checking cachedResponse.exists() second time,
+  // b/c it can be created during fetch by another test
+  if (realResponse.ok() && !cachedResponse.exists()) {
+    await cachedResponse.save(realResponse);
   }
 
-  return response;
+  return realResponse;
 }

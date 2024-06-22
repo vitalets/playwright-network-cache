@@ -1,3 +1,7 @@
+/**
+ * Class representing cached response in Playwright's APIResponse interface.
+ */
+
 import { APIResponse } from '@playwright/test';
 import { ResponseInfo } from '../types';
 

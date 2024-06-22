@@ -17,7 +17,7 @@ export type CacheOptions = {
   ttlMinutes?: number;
 };
 
-export class CacheEntry {
+export class CachedResponse {
   private options: Required<CacheOptions>;
   private dir: string;
   private headersFile: HeadersFile;
@@ -43,14 +43,14 @@ export class CacheEntry {
     return age < this.options.ttlMinutes * 60 * 1000;
   }
 
-  async getResponse() {
+  async get() {
     const responseInfo = await this.headersFile.read();
     const bodyFile = new BodyFile(this.dir, responseInfo);
     const body = await bodyFile.read();
     return new SyntheticApiResponse(responseInfo, body);
   }
 
-  async saveResponse(response: APIResponse) {
+  async save(response: APIResponse) {
     const responseInfo: ResponseInfo = {
       url: response.url(),
       status: response.status(),
