@@ -5,7 +5,7 @@ type CacheStrategy = 'on' | 'off';
 
 export const CACHE_DIR = process.env.NETWORK_CACHE_DIR || '.network-cache';
 export const CACHE_STRATEGY = (process.env.NETWORK_CACHE || 'on') as CacheStrategy;
-export const CACHE_TTL = Number(process.env.NETWORK_CACHE_TTL || 60);
+export const CACHE_TTL = Number(process.env.NETWORK_CACHE_TTL || -1);
 
 export const defaultOptions: Required<CacheOptions> = {
   cacheKey: defaultCacheKey,

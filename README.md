@@ -60,7 +60,7 @@ import { fetchWithCache } from 'playwright-network-cache';
 test('test', async ({ page }) => {
   await page.route('/api/cats', async (route) => {
     const res = await fetchWithCache(route);
-    const json = (await res.json()) as Cat[];
+    const json: Cat[] = await res.json();
     json[0].name = 'Kitty';
     await route.fulfill({ json });
   });
@@ -78,11 +78,33 @@ test('test', async ({ page }) => {
     const res = await fetchWithCache(route, null, {
       cacheKey: (req) => ['some-prefix', req.method()],
     });
-    const json = (await res.json()) as Cat[];
+    const json: Cat[] = await res.json();
     json[0].name = 'Kitty';
     await route.fulfill({ json });
   });
   await page.goto('/');
+  // ...
+});
+```
+
+#### Cache expiration
+By default responses are cached forever, until you manually delete cache files.
+You can cache this behavior by providing `ttlMinutes` option to specific request,
+or setting `NETWORK_CACHE_TTL` globally.
+
+Set cache expiration delay for 1 hour for specific request:
+```ts
+await routeWithCache(page, '/api/cats', {
+  ttlMinutes: 60
+});
+```
+Set cache expiration delay **globally** for all responses:
+```ts
+// playwright.config.ts
+
+process.env.NETWORK_CACHE_TTL = '60';
+
+export default defineConfig({
   // ...
 });
 ```

@@ -29,7 +29,7 @@ test('fetchWithCache', async ({ page }) => {
   await page.goto('/');
   await page.route('/api/cats', async (route) => {
     const res = await fetchWithCache(route);
-    const json = (await res.json()) as Cat[];
+    const json: Cat[] = await res.json();
     json[0].name = 'Kitty';
     await route.fulfill({ json });
   });
@@ -43,7 +43,7 @@ test('fetchWithCache (custom key)', async ({ page }) => {
     const res = await fetchWithCache(route, null, {
       cacheKey: 'cats',
     });
-    const json = (await res.json()) as Cat[];
+    const json: Cat[] = await res.json();
     json[0].name = 'Kitty';
     await route.fulfill({ json });
   });
