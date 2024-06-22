@@ -1,5 +1,5 @@
 import { Request } from '@playwright/test';
-import { CacheOptions } from './CacheEntry';
+import { CacheOptions } from './CachedResponse';
 
 type CacheStrategy = 'on' | 'off';
 
