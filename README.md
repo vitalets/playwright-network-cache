@@ -29,7 +29,7 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-For caching route **without** modifying the response use `routeWithCache`:
+To cache route **without modifying the response**, use `routeWithCache`:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
@@ -40,7 +40,7 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
-You can fully customize cacheKey - array of strings that will produce cache  directory for that request:
+You can fully customize `cacheKey` - array of strings that will produce cache  directory for that request:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
@@ -55,7 +55,7 @@ test('test', async ({ page }) => {
 ```
 > By default cacheKey is: `hostname` + `pathname` + `method` + `query`. See [implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/config.ts#L15).
 
-To cache route **with** modifying the response use `fetchWithCache` (that is similar to `route.fetch`):
+To cache route **with modifying the response**, use `fetchWithCache` (that is similar to `route.fetch`):
 ```ts
 import { test } from '@playwright/test';
 import { fetchWithCache } from 'playwright-network-cache';
@@ -71,7 +71,7 @@ test('test', async ({ page }) => {
   // ...
 });
 ```
-You can also customize cacheKey:
+You can also customize `cacheKey`:
 ```ts
 import { test } from '@playwright/test';
 import { fetchWithCache } from 'playwright-network-cache';
