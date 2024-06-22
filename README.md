@@ -1,4 +1,7 @@
 # playwright-network-cache
+[![npm version](https://img.shields.io/npm/v/playwright-network-cache)](https://www.npmjs.com/package/playwright-network-cache)
+[![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
+
 Cache network requests for faster [Playwright](https://playwright.dev/) tests.
 
 ## Features
