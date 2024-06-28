@@ -155,7 +155,10 @@ Running 3 tests using 1 worker
 ```
 
 ## Alternatives
-There is alternative package [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) that does many the same things but relies on HAR format.
+
+* [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - does the same things but relies on HAR format.
+* [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR, looks abandoned.
+
 
 ## Feedback
 Feel free to share your feedback and suggestions in [issues](https://github.com/vitalets/playwright-network-cache/issues).
