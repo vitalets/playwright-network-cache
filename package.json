@@ -25,6 +25,7 @@
     "example": "npx playwright test -c example",
     "example:initcache": "rm -rf .network-cache && npm run example",
     "example:nocache": "NETWORK_CACHE=off npm run example",
+    "toc": "markdown-toc -i README.md",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
@@ -37,6 +38,7 @@
     "globals": "15.5.0",
     "knip": "5.19.0",
     "lint-staged": "15.2.7",
+    "markdown-toc": "1.2.0",
     "np": "10.0.5",
     "prettier": "3.3.2",
     "publint": "0.2.8",

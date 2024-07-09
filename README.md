@@ -4,6 +4,22 @@
 
 Cache network requests in [Playwright](https://playwright.dev/) tests.
 
+<!-- toc -->
+
+- [Features](#features)
+- [Cache structure](#cache-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+  * [Without response modification](#without-response-modification)
+  * [With response modification](#with-response-modification)
+- [Cache expiration](#cache-expiration)
+- [Showcase](#showcase)
+- [Alternatives](#alternatives)
+- [Feedback](#feedback)
+- [License](#license)
+
+<!-- tocstop -->
+
 ## Features
 
 * requests are cached in separate files on file-system
@@ -31,7 +47,7 @@ npm i -D playwright-network-cache
 
 ## Usage
 
-#### Without response modification
+### Without response modification
 To cache route without modifying the response use `routeWithCache`:
 ```ts
 import { test } from '@playwright/test';
@@ -56,7 +72,7 @@ test('test', async ({ page }) => {
 ```
 > By default cacheKey is: `hostname` + `pathname` + `method` + `query`. See [implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/config.ts#L15).
 
-#### With response modification
+### With response modification
 To cache route with modifying the response, use `fetchWithCache()` function. It is similar to [`route.fetch`](https://playwright.dev/docs/api/class-route#route-fetch)):
 ```ts
 import { test } from '@playwright/test';
@@ -90,7 +106,7 @@ test('test', async ({ page }) => {
 });
 ```
 
-#### Cache expiration
+## Cache expiration
 By default responses are cached forever, until you manually delete cache files.
 You can change this behavior by providing `ttlMinutes` option for specific request,
 or setting `NETWORK_CACHE_TTL` globally.
