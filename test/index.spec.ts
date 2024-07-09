@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import { routeWithCache, fetchWithCache } from '../src';
-import type { Cat } from './server';
+import type { Cat } from './app/server';
 
 const cacheDir = process.env.NETWORK_CACHE_DIR;
 

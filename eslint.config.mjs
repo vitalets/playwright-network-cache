@@ -39,12 +39,19 @@ export default [
     },
   },
   {
+    files: ['example/**/*.ts'],
+    rules: {
+      'max-statements': 0,
+    },
+  },
+  {
     files: ['test/**/*.{ts,js}'],
     plugins: {
       playwright,
     },
     rules: {
       'max-params': 0,
+      'max-statements': 0,
       'no-empty-pattern': 0,
       '@typescript-eslint/no-empty-function': 0,
       'playwright/no-focused-test': 'error',

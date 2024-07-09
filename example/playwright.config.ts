@@ -8,7 +8,7 @@ export default defineConfig({
     baseURL,
   },
   webServer: {
-    command: 'npx ts-node ./src',
+    command: 'npx ts-node ./src/server',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
