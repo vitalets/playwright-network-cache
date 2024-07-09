@@ -14,7 +14,7 @@ Cache network requests in [Playwright](https://playwright.dev/) tests.
 * does not use HAR format
 
 ## Cache structure
-Example of cache directory structure created for GET request to `https://example.com/api-cats`:
+Example of cache structure created for GET request to `https://example.com/api-cats`:
 ```
 .network-cache
 └── example.com
@@ -30,14 +30,15 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-To cache route **without modifying the response**, use `routeWithCache`:
+
+#### Without response modification
+To cache route without modifying the response use `routeWithCache`:
 ```ts
 import { test } from '@playwright/test';
 import { routeWithCache } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
   await routeWithCache(page, '/api/cats');
-  await page.goto('/');
   // ...
 });
 ```
@@ -50,25 +51,24 @@ test('test', async ({ page }) => {
   await routeWithCache(page, '/api/cats', {
     cacheKey: (req) => ['some-prefix', req.method()],
   });
-  await page.goto('/');
   // ...
 });
 ```
 > By default cacheKey is: `hostname` + `pathname` + `method` + `query`. See [implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/config.ts#L15).
 
-To cache route **with modifying the response**, use `fetchWithCache` (that is similar to [`route.fetch`](https://playwright.dev/docs/api/class-route#route-fetch)):
+#### With response modification
+To cache route with modifying the response, use `fetchWithCache()` function. It is similar to [`route.fetch`](https://playwright.dev/docs/api/class-route#route-fetch)):
 ```ts
 import { test } from '@playwright/test';
 import { fetchWithCache } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
   await page.route('/api/cats', async (route) => {
-    const res = await fetchWithCache(route);
+    const res = await fetchWithCache(route); // <- fetch response from cache / from server
     const json: Cat[] = await res.json();
-    json[0].name = 'Kitty';
+    json[0].name = 'Kitty'; // <- modify response
     await route.fulfill({ json });
   });
-  await page.goto('/');
   // ...
 });
 ```
@@ -83,10 +83,9 @@ test('test', async ({ page }) => {
       cacheKey: (req) => ['some-prefix', req.method()],
     });
     const json: Cat[] = await res.json();
-    json[0].name = 'Kitty';
+    json[0].name = 'Kitty'; // <- modify response
     await route.fulfill({ json });
   });
-  await page.goto('/');
   // ...
 });
 ```
