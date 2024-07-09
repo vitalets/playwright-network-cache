@@ -37,12 +37,12 @@ export async function fetchWithCache(
     return cachedResponse.get();
   }
 
-  const realResponse = await getResponseFromServer();
+  const serverResponse = await getResponseFromServer();
   // checking cachedResponse.exists() second time,
   // b/c it can be created during fetch by another test
-  if (realResponse.ok() && !cachedResponse.exists()) {
-    await cachedResponse.save(realResponse);
+  if (serverResponse.ok() && !cachedResponse.exists()) {
+    await cachedResponse.save(serverResponse);
   }
 
-  return realResponse;
+  return serverResponse;
 }
