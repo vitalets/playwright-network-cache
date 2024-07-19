@@ -42,7 +42,6 @@
   <body>
     <h1>Welcome to the Cat Info Page</h1>
     <p>This is a simple page serving cat information.</p>
-    <button id="fetch-cats-button">Fetch Cats</button>
     <div id="loader" class="loader"></div>
     <h2>Cat List</h2>
     <ul class="cat-list" id="cat-list"></ul>
@@ -73,8 +72,8 @@
         }
       }
 
-      // Add event listener to the button
-      document.getElementById('fetch-cats-button').addEventListener('click', fetchCatData);
+      // fetch cats on load
+      fetchCatData();
     </script>
   </body>
 </html>

@@ -22,9 +22,11 @@
     "prettier": "prettier --check --ignore-unknown .",
     "prettier:w": "prettier --write --ignore-unknown .",
     "test": "rm -rf test/.network-cache && npx playwright test",
+    "test:d": "npm test -- --debug",
     "example": "npx playwright test -c example",
     "example:initcache": "rm -rf .network-cache && npm run example",
     "example:nocache": "NETWORK_CACHE=off npm run example",
+    "example:serve": "npx ts-node ./example/src/server",
     "toc": "markdown-toc -i README.md",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"

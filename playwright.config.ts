@@ -8,6 +8,10 @@ export default defineConfig({
   testDir: 'test',
   use: {
     baseURL,
+    viewport: { width: 800, height: 600 },
+  },
+  expect: {
+    timeout: 1000,
   },
   webServer: {
     command: 'npx ts-node test/app/server',

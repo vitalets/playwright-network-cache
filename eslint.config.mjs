@@ -42,6 +42,7 @@ export default [
     files: ['example/**/*.ts'],
     rules: {
       'max-statements': 0,
+      complexity: 0,
     },
   },
   {

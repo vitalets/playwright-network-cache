@@ -40,41 +40,61 @@
     </style>
   </head>
   <body>
-    <h1>Welcome to the Cat Info Page</h1>
-    <p>This is a simple page serving cat information.</p>
-    <button id="fetch-cats-button">Fetch Cats</button>
+    <h1>Cats Info Page</h1>
     <div id="loader" class="loader"></div>
-    <h2>Cat List</h2>
-    <ul class="cat-list" id="cat-list"></ul>
+    <div id="cats">
+      <input id="cat-name" type="text" />
+      <button id="add-cat-button">Add Cat</button>
+      <ul class="cat-list" id="cat-list"></ul>
+    </div>
 
     <script>
-      async function fetchCatData() {
-        const loader = document.getElementById('loader');
-        const catList = document.getElementById('cat-list');
+      const loader = document.getElementById('loader');
+      const content = document.getElementById('cats');
 
+      async function fetchCatData() {
         try {
           loader.style.display = 'block'; // Show loader
+          content.style.display = 'none';
           const response = await fetch('/api/cats');
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
           const cats = await response.json();
-          catList.innerHTML = ''; // Clear existing cat list
-          cats.forEach((cat) => {
-            const listItem = document.createElement('li');
-            listItem.className = 'cat-item';
-            listItem.textContent = `Name: ${cat.name}, Breed: ${cat.breed}, Age: ${cat.age}`;
-            catList.appendChild(listItem);
-          });
+          renderCats(cats);
         } catch (error) {
           console.error('Fetch error:', error);
         } finally {
           loader.style.display = 'none'; // Hide loader
+          content.style.display = 'block';
         }
       }
 
-      // Add event listener to the button
-      document.getElementById('fetch-cats-button').addEventListener('click', fetchCatData);
+      async function addCat() {
+        const name = document.getElementById('cat-name').value;
+        const response = await fetch(`/api/cats?name=${encodeURIComponent(name)}`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        await fetchCatData();
+      }
+
+      function renderCats(cats) {
+        const catList = document.getElementById('cat-list');
+        catList.innerHTML = ''; // Clear existing cat list
+        cats.forEach((cat) => {
+          const listItem = document.createElement('li');
+          listItem.className = 'cat-item';
+          listItem.textContent = `Name: ${cat.name}, Breed: ${cat.breed}, Age: ${cat.age}`;
+          catList.appendChild(listItem);
+        });
+      }
+
+      document.getElementById('add-cat-button').addEventListener('click', addCat);
+
+      fetchCatData();
     </script>
   </body>
 </html>
