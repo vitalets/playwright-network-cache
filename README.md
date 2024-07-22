@@ -22,12 +22,11 @@ Cache network requests in [Playwright](https://playwright.dev/) tests.
 
 ## Features
 
-* requests are cached in separate files on file-system
-* file path (= cacheKey) is fully customizable, you control what and how to cache (see [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754))
-* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
+* requests are cached in straightforward files structure
 * JSON responses are pretty formatted, you can inspect it for debug
+* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
 * cache is persistent between test-runs, duration is configurable
-* does not use HAR format
+* no mess with HAR format
 
 ## Cache structure
 Example of cache structure created for GET request to `https://example.com/api-cats`:
@@ -39,6 +38,7 @@ Example of cache structure created for GET request to `https://example.com/api-c
             ├── headers.json
             └── body.json
 ```
+
 ## Installation
 Install from npm:
 ```
@@ -69,7 +69,7 @@ test('test', async ({ page }) => {
 });
 ```
 
-Cache requests to `/api/cats` and modify response for test:
+Modify cached response:
 ```js
 import { test } from '@playwright/test';
 import { withCache } from 'playwright-network-cache';
@@ -84,7 +84,7 @@ test('test', async ({ page }) => {
 });
 ```
 
-Additionally match by request body:
+Match by request body:
 ```ts
 import { test } from '@playwright/test';
 import { withCache } from 'playwright-network-cache';
@@ -118,34 +118,35 @@ and generate the following cache structure:
 
 > Default caching prefix is: `hostname` + `pathname` + `method` + `query`.
 
-
 ## Configuration
-By default responses are cached forever, until you manually delete cache files.
-You can change this behavior by providing `ttlMinutes` option for specific request,
-or setting `NETWORK_CACHE_TTL` globally.
-
-Set cache expiration delay for 1 hour for specific request:
+Caching options can be changed in Playwright config:
 ```ts
-await routeWithCache(page, '/api/cats', {
-  ttlMinutes: 60
+import { defineConfig } from '@playwright/test';
+import { defineNetworkCacheConfig } from 'playwright-network-cache';
+
+export const cacheConfig = defineNetworkCacheConfig({
+  baseDir: 'test/.network-cache',
+  ttl: 60,
 });
-```
-Set cache expiration delay **globally** for all requests:
-```ts
-// playwright.config.ts
-
-process.env.NETWORK_CACHE_TTL = '60';
 
 export default defineConfig({
   // ...
 });
 ```
 
-## Alternatives
+## About HAR
+In my opinion, [HAR](https://en.wikipedia.org/wiki/HAR_(file_format)) is not the best format for fine-grained control of network in e2e testing. There are several issues in Playwright repo showing how people struggle with it: [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754), [#29190](https://github.com/microsoft/playwright/issues/29190).
 
+This library intentionally does not use HAR. Instead, it generates simple file-based cache structure, giving you full control of what and how is cached.
+
+Alternatively, you can check the following HAR-based libraries:
 * [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - does the same things but relies on HAR format.
 * [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR, looks abandoned.
 
+## Changelog
+
+#### 0.2.0
+* new api released (breaking)
 
 ## Feedback
 Feel free to share your feedback and suggestions in [issues](https://github.com/vitalets/playwright-network-cache/issues).

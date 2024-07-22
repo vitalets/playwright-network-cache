@@ -11,14 +11,17 @@ export type CacheOptions = Partial<CacheEntryOptions> & {
   modify?: ModifyFn;
 };
 
-export const defaults = {
-  baseDir: process.env.NETWORK_CACHE_DIR || '.network-cache',
-  strategy: (process.env.NETWORK_CACHE || 'on') as CacheStrategy,
-  ttl: toNumber(process.env.NETWORK_CACHE_TTL),
+const defaults = {
+  baseDir: '.network-cache',
+  strategy: 'on' as CacheStrategy,
   modify: async (route: Route, response: APIResponse) => {
     await route.fulfill({ response });
   },
 } satisfies CacheOptions;
+
+export function defineNetworkCacheConfig(userConfig?: CacheOptions) {
+  return Object.assign(defaults, userConfig);
+}
 
 export type ResolvedCacheOptions = ReturnType<typeof resolveCacheOptions>;
 
@@ -29,8 +32,4 @@ export function resolveCacheOptions(cacheOptionsOrFn?: CacheOptions | CacheOptio
       : cacheOptionsOrFn;
 
   return Object.assign({}, defaults, cacheOptionsUser);
-}
-
-function toNumber(value?: string) {
-  return value ? Number(value) : undefined;
 }

@@ -1,8 +1,13 @@
 import { Page, Route, BrowserContext } from '@playwright/test';
-import { CacheOptions, resolveCacheOptions, ResolvedCacheOptions, defaults } from './options';
+import {
+  CacheOptions,
+  defineNetworkCacheConfig,
+  resolveCacheOptions,
+  ResolvedCacheOptions,
+} from './options';
 import { CacheEntry } from './CacheEntry';
 
-export { defaults, CacheOptions };
+export { defineNetworkCacheConfig, CacheOptions };
 
 export async function withCache(
   page: Page | BrowserContext,

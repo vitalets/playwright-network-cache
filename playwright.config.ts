@@ -1,6 +1,10 @@
 import { defineConfig } from '@playwright/test';
+import { defineNetworkCacheConfig } from './src';
 
-process.env.NETWORK_CACHE_DIR = 'test/.network-cache';
+export const cacheConfig = defineNetworkCacheConfig({
+  baseDir: 'test/.network-cache',
+  ttl: 10,
+});
 
 const baseURL = 'http://localhost:3000';
 
