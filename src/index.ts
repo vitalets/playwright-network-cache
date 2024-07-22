@@ -1,9 +1,9 @@
 import { Page, Route, APIResponse, BrowserContext } from '@playwright/test';
-import { RequestOverrides } from './types';
-import { CACHE_STRATEGY } from './config';
+import { CACHE_DIR, CACHE_STRATEGY, defaults } from './defaults';
 import { CacheEntry, CacheEntryOptions } from './CacheEntry';
 
 type ModifyFn = (route: Route, response: APIResponse) => Promise<unknown>;
+type RequestOverrides = Parameters<Route['fetch']>[0];
 
 export type CacheOptions = CacheEntryOptions & {
   overrides?: RequestOverrides;
@@ -15,21 +15,18 @@ export async function withCache(
   url: Parameters<Page['route']>[0],
   cacheOptionsOrFn?: CacheOptions | ModifyFn,
 ) {
-  const cacheOptions =
-    typeof cacheOptionsOrFn === 'function' ? { modify: cacheOptionsOrFn } : cacheOptionsOrFn;
+  const cacheOptions = buildCacheOptions(cacheOptionsOrFn);
 
-  // todo: check that such route already registered and unregister
   await page.route(url, async (route) => {
     const response = await fetchWithCache(route, cacheOptions);
-    const modify = cacheOptions?.modify || defaultModify;
-    await modify(route, response);
+    await cacheOptions.modify(route, response);
   });
 }
 
 // eslint-disable-next-line complexity
-async function fetchWithCache(route: Route, cacheOptions: CacheOptions = {}) {
+async function fetchWithCache(route: Route, cacheOptions: CacheOptions) {
   const { key, ttl } = cacheOptions;
-  const cacheEntry = new CacheEntry(route.request(), { key, ttl });
+  const cacheEntry = new CacheEntry(CACHE_DIR, route.request(), { key, ttl });
   const getResponseFromServer = () => route.fetch(cacheOptions.overrides);
 
   if (CACHE_STRATEGY === 'off') {
@@ -50,6 +47,9 @@ async function fetchWithCache(route: Route, cacheOptions: CacheOptions = {}) {
   return serverResponse;
 }
 
-const defaultModify = async (route: Route, response: APIResponse) => {
-  await route.fulfill({ response });
-};
+function buildCacheOptions(cacheOptionsOrFn?: CacheOptions | ModifyFn) {
+  const cacheOptionsUser =
+    typeof cacheOptionsOrFn === 'function' ? { modify: cacheOptionsOrFn } : cacheOptionsOrFn;
+
+  return Object.assign({}, defaults, cacheOptionsUser);
+}

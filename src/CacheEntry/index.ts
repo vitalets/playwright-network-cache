@@ -3,10 +3,8 @@
  */
 import path from 'node:path';
 import { Request, APIResponse } from '@playwright/test';
-import { CACHE_DIR, defaultOptions } from '../config';
-import { ResponseInfo } from '../types';
 import { filenamify, toArray } from '../utils';
-import { HeadersFile } from './HeadersFile';
+import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
 
@@ -19,16 +17,15 @@ export type CacheEntryOptions = {
 };
 
 export class CacheEntry {
-  private options: CacheEntryOptions;
   private cacheKey: string[];
   private cacheDir: string;
   private headersFile: HeadersFile;
 
   constructor(
+    private baseCacheDir: string,
     private req: Request,
-    options?: CacheEntryOptions,
+    private options: CacheEntryOptions,
   ) {
-    this.options = Object.assign({}, defaultOptions, options);
     this.cacheKey = this.buildCacheKey();
     this.cacheDir = this.buildCacheDir();
     this.headersFile = new HeadersFile(this.cacheDir);
@@ -69,7 +66,7 @@ export class CacheEntry {
       throw new Error(`Empty cache key after filenamify: ${this.cacheKey}`);
     }
 
-    return path.join(CACHE_DIR, ...sanitizedCacheKey);
+    return path.join(this.baseCacheDir, ...sanitizedCacheKey);
   }
 
   private buildCacheKey() {

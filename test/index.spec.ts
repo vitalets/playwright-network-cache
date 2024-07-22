@@ -58,3 +58,23 @@ test('modify response (pass function)', async ({ page }) => {
   await page.goto('/modify-via-fn/');
   await expect(page.getByRole('list')).toContainText('Kitty');
 });
+
+test('re-define route', async ({ page }) => {
+  await withCache(page, '**/api/cats', async (route, res) => {
+    const json: Cat[] = await res.json();
+    json[0].name = 'Kitty-1';
+    await route.fulfill({ json });
+  });
+
+  await page.goto('/re-define/');
+  await expect(page.getByRole('list')).toContainText('Kitty-1');
+
+  await withCache(page, '**/api/cats', async (route, res) => {
+    const json: Cat[] = await res.json();
+    json[0].name = 'Kitty-2';
+    await route.fulfill({ json });
+  });
+
+  await page.goto('/re-define/');
+  await expect(page.getByRole('list')).toContainText('Kitty-2');
+});

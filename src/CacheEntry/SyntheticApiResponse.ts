@@ -3,7 +3,7 @@
  */
 import { APIResponse } from '@playwright/test';
 import { PwApiResponse } from './PwApiResponse';
-import { ResponseInfo } from '../types';
+import { ResponseInfo } from './HeadersFile';
 
 // Important to inherit from Playwright's APIResponse,
 // because route.fulfill() checks response via instance of:

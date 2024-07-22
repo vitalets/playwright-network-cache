@@ -3,8 +3,14 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ResponseInfo } from '../types';
 import { prettifyJson } from '../utils';
+
+export type ResponseInfo = {
+  url: string;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+};
 
 export class HeadersFile {
   path: string;

@@ -3,8 +3,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ResponseInfo } from '../types';
 import { isJsonResponse, prettifyJson } from '../utils';
+import { ResponseInfo } from './HeadersFile';
 
 export class BodyFile {
   path: string;
