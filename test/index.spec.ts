@@ -14,7 +14,9 @@ test('without options', async ({ page }) => {
 });
 
 test('custom key', async ({ page }) => {
-  await withCache(page, '**/api/cats', { key: 'foo' });
+  await withCache(page, '**/api/cats', {
+    key: (_req) => 'foo',
+  });
 
   await page.goto('/custom-key/');
 

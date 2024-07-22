@@ -12,6 +12,7 @@ type CacheKey = string | string[] | null;
 type CacheKeyFn = (req: Request) => CacheKey;
 
 export type CacheEntryOptions = {
+  baseDir: string;
   key?: CacheKey | CacheKeyFn;
   ttl?: number;
 };
@@ -22,7 +23,6 @@ export class CacheEntry {
   private headersFile: HeadersFile;
 
   constructor(
-    private baseCacheDir: string,
     private req: Request,
     private options: CacheEntryOptions,
   ) {
@@ -66,7 +66,7 @@ export class CacheEntry {
       throw new Error(`Empty cache key after filenamify: ${this.cacheKey}`);
     }
 
-    return path.join(this.baseCacheDir, ...sanitizedCacheKey);
+    return path.join(this.options.baseDir, ...sanitizedCacheKey);
   }
 
   private buildCacheKey() {
