@@ -53,7 +53,7 @@
 
         try {
           loader.style.display = 'block'; // Show loader
-          const response = await fetch('/api/cats');
+          const response = await fetch('api/cats');
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }

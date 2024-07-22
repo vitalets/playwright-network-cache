@@ -18,23 +18,16 @@ const cats: Cat[] = [
 ];
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/') {
-    const filePath = path.join(__dirname, 'index.html');
-    const content = await fs.readFile(filePath);
-    res.setHeader('Content-Type', 'text/html');
-    res.end(content);
-    return;
-  }
-
-  if (req.method === 'GET' && req.url === '/api/cats') {
+  if (req.method === 'GET' && req.url?.includes('/api/cats')) {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.end(JSON.stringify(cats));
     return;
   }
 
-  res.statusCode = 404;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Not Found');
+  const filePath = path.join(__dirname, 'index.html');
+  const content = await fs.readFile(filePath);
+  res.setHeader('Content-Type', 'text/html');
+  res.end(content);
 });
 
 server.listen(PORT, () => {

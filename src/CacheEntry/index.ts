@@ -15,7 +15,6 @@ type CacheKeyFn = (req: Request) => CacheKey;
 
 export type CacheEntryOptions = {
   key?: CacheKey | CacheKeyFn;
-  fullKey?: CacheKey | CacheKeyFn;
   ttl?: number;
 };
 
@@ -74,15 +73,8 @@ export class CacheEntry {
   }
 
   private buildCacheKey() {
-    const { key, fullKey } = this.options;
-
-    if (fullKey) {
-      // todo: warn if key is defined as well
-      return this.getOrEvaluateKey(fullKey);
-    }
-
     const defaultKey = this.getDefaultKey();
-    const userKey = this.getOrEvaluateKey(key);
+    const userKey = this.getOrEvaluateKey(this.options.key);
 
     return defaultKey.concat(userKey);
   }
