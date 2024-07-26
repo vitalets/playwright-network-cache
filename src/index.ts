@@ -1,47 +1,14 @@
-import { Page, Route, BrowserContext } from '@playwright/test';
-import {
-  CacheOptions,
-  defineNetworkCacheConfig,
-  resolveCacheOptions,
-  ResolvedCacheOptions,
-} from './options';
-import { CacheEntry } from './CacheEntry';
+import { defineNetworkCacheConfig, NetworkCacheConfig } from './config';
+import { cacheRouteFactory, CacheRouteOptions } from './cacheRouteFactory';
 
-export { defineNetworkCacheConfig, CacheOptions };
+export { defineNetworkCacheConfig, NetworkCacheConfig, CacheRouteOptions };
 
-export async function withCache(
-  page: Page | BrowserContext,
-  url: Parameters<Page['route']>[0],
-  cacheOptionsOrFn?: CacheOptions | CacheOptions['modify'],
-) {
-  const cacheOptions = resolveCacheOptions(cacheOptionsOrFn);
-
-  await page.route(url, async (route) => {
-    const response = await fetchWithCache(route, cacheOptions);
-    await cacheOptions.modify(route, response);
-  });
-}
-
-// eslint-disable-next-line complexity
-async function fetchWithCache(route: Route, cacheOptions: ResolvedCacheOptions) {
-  const { baseDir, key, ttl } = cacheOptions;
-  const cacheEntry = new CacheEntry(route.request(), { baseDir, key, ttl });
-  const getResponseFromServer = () => route.fetch(cacheOptions.overrides);
-
-  if (cacheOptions.strategy === 'off') {
-    return getResponseFromServer();
-  }
-
-  if (cacheEntry.exists()) {
-    return cacheEntry.getResponse();
-  }
-
-  const serverResponse = await getResponseFromServer();
-  // checking cachedResponse.exists() second time,
-  // b/c it can be created during fetch by another test
-  if (serverResponse.ok() && !cacheEntry.exists()) {
-    await cacheEntry.saveResponse(serverResponse);
-  }
-
-  return serverResponse;
-}
+export const cacheRoute = {
+  GET: cacheRouteFactory('GET'),
+  POST: cacheRouteFactory('POST'),
+  PUT: cacheRouteFactory('PUT'),
+  PATCH: cacheRouteFactory('PATCH'),
+  DELETE: cacheRouteFactory('DELETE'),
+  HEAD: cacheRouteFactory('HEAD'),
+  ALL: cacheRouteFactory('ALL'),
+};

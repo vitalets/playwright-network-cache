@@ -3,22 +3,21 @@
  */
 import path from 'node:path';
 import { Request, APIResponse } from '@playwright/test';
-import { filenamify, toArray } from '../utils';
+import { filenamify, stripLeadingSlash, toArray } from '../utils';
 import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
 
-type CacheKey = string | string[] | null;
-type CacheKeyFn = (req: Request) => CacheKey;
+type SubDir = string | string[] | null | undefined;
+type SubDirFn = (req: Request) => SubDir;
 
 export type CacheEntryOptions = {
   baseDir: string;
-  key?: CacheKey | CacheKeyFn;
+  subDir?: SubDir | SubDirFn;
   ttl?: number;
 };
 
 export class CacheEntry {
-  private cacheKey: string[];
   private cacheDir: string;
   private headersFile: HeadersFile;
 
@@ -26,7 +25,6 @@ export class CacheEntry {
     private req: Request,
     private options: CacheEntryOptions,
   ) {
-    this.cacheKey = this.buildCacheKey();
     this.cacheDir = this.buildCacheDir();
     this.headersFile = new HeadersFile(this.cacheDir);
   }
@@ -58,37 +56,22 @@ export class CacheEntry {
   }
 
   private buildCacheDir() {
-    const sanitizedCacheKey = this.cacheKey
-      .map((part) => filenamify(part.replace(/^\/+/, '')))
-      .filter(Boolean);
-
-    if (!sanitizedCacheKey.length) {
-      throw new Error(`Empty cache key after filenamify: ${this.cacheKey}`);
-    }
-
-    return path.join(this.options.baseDir, ...sanitizedCacheKey);
-  }
-
-  private buildCacheKey() {
-    const defaultKey = this.getDefaultKey();
-    const userKey = this.getOrEvaluateKey(this.options.key);
-
-    return defaultKey.concat(userKey);
-  }
-
-  private getDefaultKey() {
-    const method = this.req.method();
     const url = new URL(this.req.url());
-    const query = url.searchParams.toString();
-    return [
+    const dirs = [
       url.hostname, // prettier-ignore
       url.pathname,
-      `${method}${query ? `_${query}` : ''}`,
-    ];
+      this.req.method(),
+      ...this.getSubDirs(),
+    ]
+      .map((dir) => filenamify(stripLeadingSlash(dir)))
+      .filter(Boolean);
+
+    return path.join(this.options.baseDir, ...dirs);
   }
 
-  private getOrEvaluateKey(key?: CacheKey | CacheKeyFn) {
-    const value = typeof key === 'function' ? key(this.req) : key;
-    return value ? toArray(value) : [];
+  private getSubDirs() {
+    const { subDir } = this.options;
+    const evaluated = typeof subDir === 'function' ? subDir(this.req) : subDir;
+    return evaluated ? toArray(evaluated) : [];
   }
 }

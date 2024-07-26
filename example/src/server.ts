@@ -5,7 +5,7 @@ import timers from 'timers/promises';
 
 const PORT = 4000;
 
-interface Cat {
+export interface Cat {
   id: number;
   name: string;
   breed: string;

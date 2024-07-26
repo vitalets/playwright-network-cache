@@ -23,3 +23,7 @@ export function filenamify(s: string, replacement = '-') {
 export function toArray<T>(value: T | T[]) {
   return Array.isArray(value) ? value : [value];
 }
+
+export function stripLeadingSlash(s: string) {
+  return s.replace(/^\/+/, '');
+}

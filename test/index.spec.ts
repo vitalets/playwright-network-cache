@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { withCache } from '../src';
+import { cacheRoute } from '../src';
 import { json } from './helpers';
-import { Cat } from './app/server';
 
 test('without options', async ({ page }) => {
-  await withCache(page, '**/api/cats');
+  await cacheRoute.GET(page, '**/api/cats');
 
   await page.goto('/no-opts/');
 
@@ -13,10 +12,8 @@ test('without options', async ({ page }) => {
   expect(json(`localhost/no-opts-api-cats/GET/body.json`)).toHaveProperty('[0].id', 1);
 });
 
-test('custom key', async ({ page }) => {
-  await withCache(page, '**/api/cats', {
-    key: (_req) => 'foo',
-  });
+test('subDir', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats', { subDir: 'foo' });
 
   await page.goto('/custom-key/');
 
@@ -24,17 +21,10 @@ test('custom key', async ({ page }) => {
   expect(json(`localhost/custom-key-api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
 });
 
-test('apply to context', async ({ page, context }) => {
-  await withCache(context, '**/api/cats');
-
-  await page.goto('/context/');
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-});
-
-test('modify response', async ({ page }) => {
-  await withCache(page, '**/api/cats', {
-    modify: async (route, res) => {
-      const json: Cat[] = await res.json();
+test('modify response (pass options)', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats', {
+    modify: async (route, response) => {
+      const json = await response.json();
       json[0].name = 'Kitty';
       await route.fulfill({ json });
     },
@@ -48,8 +38,8 @@ test('modify response', async ({ page }) => {
 });
 
 test('modify response (pass function)', async ({ page }) => {
-  await withCache(page, '**/api/cats', async (route, res) => {
-    const json: Cat[] = await res.json();
+  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
+    const json = await response.json();
     json[0].name = 'Kitty';
     await route.fulfill({ json });
   });
@@ -62,8 +52,8 @@ test('modify response (pass function)', async ({ page }) => {
 });
 
 test('re-define route', async ({ page }) => {
-  await withCache(page, '**/api/cats', async (route, res) => {
-    const json: Cat[] = await res.json();
+  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
+    const json = await response.json();
     json[0].name = 'Kitty-1';
     await route.fulfill({ json });
   });
@@ -71,12 +61,19 @@ test('re-define route', async ({ page }) => {
   await page.goto('/re-define/');
   await expect(page.getByRole('list')).toContainText('Kitty-1');
 
-  await withCache(page, '**/api/cats', async (route, res) => {
-    const json: Cat[] = await res.json();
+  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
+    const json = await response.json();
     json[0].name = 'Kitty-2';
     await route.fulfill({ json });
   });
 
   await page.goto('/re-define/');
   await expect(page.getByRole('list')).toContainText('Kitty-2');
+});
+
+test('apply to context', async ({ page, context }) => {
+  await cacheRoute.GET(context, '**/api/cats');
+
+  await page.goto('/context/');
+  await expect(page.getByRole('list')).toContainText('Whiskers');
 });
