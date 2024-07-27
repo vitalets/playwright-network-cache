@@ -21,6 +21,19 @@ test('subDir', async ({ page }) => {
   expect(json(`localhost/custom-key-api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
 });
 
+test('setSubDir', async ({ page }) => {
+  cacheRoute.setSubDir(page, 'my-dir');
+  await cacheRoute.GET(page, '**/api/cats');
+
+  await page.goto('/set-sub-dir/');
+
+  await expect(page.getByRole('list')).toContainText('Whiskers');
+  expect(json(`localhost/set-sub-dir-api-cats/GET/my-dir/headers.json`)).toHaveProperty(
+    'status',
+    200,
+  );
+});
+
 test('modify response (pass options)', async ({ page }) => {
   await cacheRoute.GET(page, '**/api/cats', {
     modify: async (route, response) => {

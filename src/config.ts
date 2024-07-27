@@ -2,9 +2,10 @@
  * Global config.
  */
 
-import { CacheRouteOptions } from './cacheRouteFactory';
+import { CacheRouteOptions } from './CacheRoute';
 
 export type NetworkCacheConfig = Pick<CacheRouteOptions, 'baseDir' | 'ttl'> & {
+  /* Disables network cache globally */
   disabled?: boolean;
 };
 
