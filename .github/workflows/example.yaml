@@ -1,0 +1,28 @@
+name: example
+
+on:
+  push:
+  pull_request:
+    branches: [main, beta]
+  schedule:
+    # run daily at 00:00
+    - cron: 0 0 * * *
+
+jobs:
+  examples:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run example
+      # run example second time with cache
+      - run: npm run example
