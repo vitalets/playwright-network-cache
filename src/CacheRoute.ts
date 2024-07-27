@@ -14,6 +14,8 @@ export type CacheRouteOptions = Partial<FetchWithCacheOptions> & {
 
 export type CacheRouteOptionsOrFn = CacheRouteOptions | CacheRouteOptions['modify'];
 
+type UrlPredicate = Parameters<Page['route']>[0];
+
 export class CacheRoute {
   private subDir = '';
 
@@ -23,37 +25,37 @@ export class CacheRoute {
     this.subDir = subDir;
   }
 
-  async GET(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async GET(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('GET', url, optionsOrFn);
   }
 
-  async POST(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async POST(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('POST', url, optionsOrFn);
   }
 
-  async PUT(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async PUT(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('PUT', url, optionsOrFn);
   }
 
-  async PATCH(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async PATCH(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('PATCH', url, optionsOrFn);
   }
 
-  async DELETE(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async DELETE(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('DELETE', url, optionsOrFn);
   }
 
-  async HEAD(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async HEAD(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('HEAD', url, optionsOrFn);
   }
 
-  async ALL(url: string, optionsOrFn?: CacheRouteOptionsOrFn) {
+  async ALL(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.createCachedRoute('ALL', url, optionsOrFn);
   }
 
   private async createCachedRoute(
     method: string,
-    url: string,
+    url: UrlPredicate,
     optionsOrFn?: CacheRouteOptionsOrFn,
   ) {
     if (config.disabled) return;
