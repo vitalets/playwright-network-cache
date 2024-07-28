@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/playwright-network-cache)](https://www.npmjs.com/package/playwright-network-cache)
 [![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
 
-Cache network requests in [Playwright](https://playwright.dev/) tests.
+Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
 
 <!-- toc -->
 
