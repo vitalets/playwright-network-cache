@@ -9,7 +9,8 @@ test('without options', async ({ page }) => {
 
   await expect(page.getByRole('list')).toContainText('Whiskers');
   expect(json(`localhost/no-opts-api-cats/GET/headers.json`)).toHaveProperty('status', 200);
-  expect(json(`localhost/no-opts-api-cats/GET/body.json`)).toHaveProperty('[0].id', 1);
+  // note: .toHaveProperty('[0].id', 1) does not work in PW 1.35
+  expect(json(`localhost/no-opts-api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
 });
 
 test('subDir', async ({ page }) => {
