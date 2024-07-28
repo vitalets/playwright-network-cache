@@ -1,6 +1,7 @@
 import http from 'http';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
+import mime from 'mime-types';
 
 const PORT = 3000;
 
@@ -24,9 +25,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  const filePath = path.join(__dirname, 'index.html');
-  const content = await fs.readFile(filePath);
-  res.setHeader('Content-Type', 'text/html');
+  const urlFilePath = req.url && req.url.length > 1 ? path.join(__dirname, req.url) : null;
+  const indexFilePath = path.join(__dirname, 'index.html');
+  const filePath = urlFilePath && fs.existsSync(urlFilePath) ? urlFilePath : indexFilePath;
+  const content = await fs.promises.readFile(filePath);
+  const contentType = mime.contentType(path.extname(filePath)) || 'application/octet-stream';
+  res.setHeader('Content-Type', contentType);
   res.end(content);
 });
 

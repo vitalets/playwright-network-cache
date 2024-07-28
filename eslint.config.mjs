@@ -54,6 +54,7 @@ export default [
       'max-params': 0,
       'max-statements': 0,
       'no-empty-pattern': 0,
+      complexity: 0,
       '@typescript-eslint/no-empty-function': 0,
       'playwright/no-focused-test': 'error',
     },

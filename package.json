@@ -33,6 +33,7 @@
   "devDependencies": {
     "@eslint/js": "9.5.0",
     "@playwright/test": "1.44.1",
+    "@types/mime-types": "2.1.4",
     "@types/node": "^18.15.0",
     "eslint": "8.57.0",
     "eslint-plugin-playwright": "1.6.2",
@@ -59,5 +60,8 @@
     "e2e"
   ],
   "funding": "https://github.com/sponsors/vitalets",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "mime-types": "2.1.35"
+  }
 }

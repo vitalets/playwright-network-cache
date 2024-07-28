@@ -3,7 +3,8 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { isJsonResponse, prettifyJson } from '../utils';
+import mime from 'mime-types';
+import { prettifyJson } from '../utils';
 import { ResponseInfo } from './HeadersFile';
 
 export class BodyFile {
@@ -13,12 +14,11 @@ export class BodyFile {
     dir: string,
     private responseInfo: ResponseInfo,
   ) {
-    const bodyFilename = this.isJson() ? 'body.json' : 'body.txt';
-    this.path = path.join(dir, bodyFilename);
+    this.path = path.join(dir, this.getFilename());
   }
 
   private isJson() {
-    return isJsonResponse(this.responseInfo.headers);
+    return this.path.endsWith('.json');
   }
 
   async read() {
@@ -33,5 +33,11 @@ export class BodyFile {
 
   private async ensureDir() {
     await fs.promises.mkdir(path.dirname(this.path), { recursive: true });
+  }
+
+  private getFilename() {
+    const contentType = this.responseInfo.headers['content-type'];
+    const extension = mime.extension(contentType) || 'bin';
+    return `body.${extension}`;
   }
 }

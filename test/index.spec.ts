@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { cacheRoute } from '../src';
-import { json } from './helpers';
+import { json, expectFileExists } from './helpers';
 
 test('without options', async ({ page }) => {
   await cacheRoute.GET(page, '**/api/cats');
@@ -93,4 +93,17 @@ test('apply to context', async ({ page, context }) => {
 
   await page.goto('/context/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
+});
+
+test('cache-images', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats');
+  await cacheRoute.GET(page, '/cat*');
+
+  await page.goto('/');
+
+  expect(json(`localhost/cat1.webp/GET/headers.json`)).toHaveProperty('status', 200);
+  expectFileExists('localhost/cat1.webp/GET/body.webp');
+
+  expect(json(`localhost/cat2.png/GET/headers.json`)).toHaveProperty('status', 200);
+  expectFileExists('localhost/cat2.png/GET/body.png');
 });

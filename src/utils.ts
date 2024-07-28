@@ -1,7 +1,3 @@
-export function isJsonResponse(headers: Record<string, string>) {
-  return headers['content-type']?.includes('application/json');
-}
-
 export function prettifyJson(data: string | Record<string, unknown>) {
   const obj = typeof data === 'string' ? JSON.parse(data) : data;
   return JSON.stringify(obj, null, 2);
