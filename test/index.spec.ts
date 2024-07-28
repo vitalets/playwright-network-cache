@@ -13,23 +13,26 @@ test('without options', async ({ page }) => {
   expect(json(`localhost/no-opts-api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
 });
 
-test('subDir', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', { subDir: 'foo' });
+test('scope', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats', { scope: 'foo' });
 
-  await page.goto('/custom-key/');
+  await page.goto('/custom-scope/');
 
   await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/custom-key-api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
+  expect(json(`localhost/custom-scope-api-cats/GET/foo/headers.json`)).toHaveProperty(
+    'status',
+    200,
+  );
 });
 
-test('setSubDir', async ({ page }) => {
-  cacheRoute.setSubDir(page, 'my-dir');
+test('setScope', async ({ page }) => {
+  cacheRoute.setScope(page, 'my-scope');
   await cacheRoute.GET(page, '**/api/cats');
 
-  await page.goto('/set-sub-dir/');
+  await page.goto('/set-scope/');
 
   await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/set-sub-dir-api-cats/GET/my-dir/headers.json`)).toHaveProperty(
+  expect(json(`localhost/set-scope-api-cats/GET/my-scope/headers.json`)).toHaveProperty(
     'status',
     200,
   );

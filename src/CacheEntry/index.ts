@@ -8,12 +8,14 @@ import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
 
-type SubDir = string | string[] | null | undefined;
-type SubDirFn = (req: Request) => SubDir;
+type Scope = string | string[] | null | undefined;
+type ScopeFn = (req: Request) => Scope;
 
 export type CacheEntryOptions = {
   baseDir: string;
-  subDir?: SubDir | SubDirFn;
+  /* Additional folder in cache dir */
+  scope?: Scope | ScopeFn;
+  /* Cache time to live (in minutes) */
   ttl?: number;
 };
 
@@ -61,7 +63,7 @@ export class CacheEntry {
       url.hostname, // prettier-ignore
       url.pathname,
       this.req.method(),
-      ...this.getSubDirs(),
+      ...this.getScope(),
     ]
       .map((dir) => filenamify(stripLeadingSlash(dir)))
       .filter(Boolean);
@@ -69,9 +71,9 @@ export class CacheEntry {
     return path.join(this.options.baseDir, ...dirs);
   }
 
-  private getSubDirs() {
-    const { subDir } = this.options;
-    const evaluated = typeof subDir === 'function' ? subDir(this.req) : subDir;
+  private getScope() {
+    const { scope } = this.options;
+    const evaluated = typeof scope === 'function' ? scope(this.req) : scope;
     return evaluated ? toArray(evaluated) : [];
   }
 }

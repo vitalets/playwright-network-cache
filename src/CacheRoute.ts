@@ -17,12 +17,12 @@ export type CacheRouteOptionsOrFn = CacheRouteOptions | CacheRouteOptions['modif
 type UrlPredicate = Parameters<Page['route']>[0];
 
 export class CacheRoute {
-  private subDir = '';
+  private scope = '';
 
   constructor(private page: Page | BrowserContext) {}
 
-  setSubDir(subDir: string) {
-    this.subDir = subDir;
+  setScope(scope: string) {
+    this.scope = scope;
   }
 
   async GET(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
@@ -80,8 +80,8 @@ export class CacheRoute {
   private resolveOptions(optionsOrFn?: CacheRouteOptionsOrFn) {
     const options = typeof optionsOrFn === 'function' ? { modify: optionsOrFn } : optionsOrFn;
 
-    // todo: merge subDir? wait user feedback
+    // todo: merge scope? (wait user feedback)
 
-    return Object.assign({ subDir: this.subDir }, config, options);
+    return Object.assign({ scope: this.scope }, config, options);
   }
 }

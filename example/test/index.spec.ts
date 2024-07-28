@@ -13,7 +13,7 @@ test('add cat', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 
-  cacheRoute.setSubDir(page, 'after-add-cat');
+  cacheRoute.setScope(page, 'after-add-cat');
 
   await page.getByRole('textbox').fill('Tomas');
   await page.getByRole('button', { name: 'Add Cat' }).click();

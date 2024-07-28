@@ -14,7 +14,7 @@ export const cacheRoute = {
   DELETE: proxyMethod('DELETE'),
   HEAD: proxyMethod('HEAD'),
   ALL: proxyMethod('ALL'),
-  setSubDir: proxyMethod('setSubDir'),
+  setScope: proxyMethod('setScope'),
 };
 
 function proxyMethod<T extends keyof CacheRoute>(method: T) {
