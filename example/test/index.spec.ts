@@ -8,12 +8,12 @@ test('load cats', async ({ page }) => {
 });
 
 test('add cat (success)', async ({ page }) => {
-  await cacheRoute.ALL(page, '/api/cats**');
+  await cacheRoute.GET(page, '/api/cats**');
 
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 
-  cacheRoute.setScope(page, 'after-add-cat');
+  await cacheRoute.ALL(page, '/api/cats**', { suffix: 'add-cat' });
 
   await page.getByRole('textbox').fill('Tomas');
   await page.getByRole('button', { name: 'Add Cat' }).click();
@@ -21,7 +21,7 @@ test('add cat (success)', async ({ page }) => {
   await expect(page.getByRole('list')).toContainText('Tomas');
 });
 
-test.only('add cat (error)', async ({ page }) => {
+test('add cat (error)', async ({ page }) => {
   await cacheRoute.GET(page, '/api/cats**');
 
   await page.goto('/');

@@ -13,29 +13,26 @@ test('without options', async ({ page }) => {
   expect(json(`localhost/no-opts-api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
 });
 
-test('scope', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', { scope: 'foo' });
+test('suffix', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats', { suffix: 'foo' });
 
-  await page.goto('/custom-scope/');
+  await page.goto('/custom-suffix/');
 
   await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/custom-scope-api-cats/GET/foo/headers.json`)).toHaveProperty(
+  expect(json(`localhost/custom-suffix-api-cats/GET/foo/headers.json`)).toHaveProperty(
     'status',
     200,
   );
 });
 
-test('setScope', async ({ page }) => {
-  cacheRoute.setScope(page, 'my-scope');
+test('setSuffix', async ({ page }) => {
+  cacheRoute.setSuffix(page, 'bar');
   await cacheRoute.GET(page, '**/api/cats');
 
-  await page.goto('/set-scope/');
+  await page.goto('/set-suffix/');
 
   await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/set-scope-api-cats/GET/my-scope/headers.json`)).toHaveProperty(
-    'status',
-    200,
-  );
+  expect(json(`localhost/set-suffix-api-cats/GET/bar/headers.json`)).toHaveProperty('status', 200);
 });
 
 test('modify response (pass options)', async ({ page }) => {

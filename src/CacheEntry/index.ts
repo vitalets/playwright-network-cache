@@ -9,25 +9,25 @@ import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
 import { config } from '../config';
 
-type Scope = string | string[] | null | undefined;
-type ScopeFn = (req: Request) => Scope;
+type CacheSuffix = string | string[] | null | undefined;
+type CacheSuffixFn = (req: Request) => CacheSuffix;
 
 export type CacheEntryOptions = {
-  /* Additional folder in cache dir */
-  scope?: Scope | ScopeFn;
+  /* Additional directory in whole cache dir */
+  suffix?: CacheSuffix | CacheSuffixFn;
   /* HTTP response status to be cached */
   status?: number;
   /* Cache time to live (in minutes) */
   ttl?: number;
 };
 
-type CacheDirFnParams = {
+export type CacheDirFnParams = {
   req: Request;
   hostname: string;
   pathname: string;
   method: string;
   status?: number;
-  scope: string[];
+  suffix: string[];
 };
 
 export type CacheDirFn = (params: CacheDirFnParams) => (string | number | undefined)[];
@@ -84,7 +84,7 @@ export class CacheEntry {
       pathname,
       method: this.req.method(),
       status: this.options.status,
-      scope: this.getScope(),
+      suffix: this.calcSuffix(),
     };
     const cacheDirFn = config.cacheDirFn || defaultCacheDirFn;
 
@@ -95,9 +95,9 @@ export class CacheEntry {
     return path.join(config.baseDir, ...dirs);
   }
 
-  private getScope() {
-    const { scope } = this.options;
-    const evaluated = typeof scope === 'function' ? scope(this.req) : scope;
+  private calcSuffix() {
+    const { suffix } = this.options;
+    const evaluated = typeof suffix === 'function' ? suffix(this.req) : suffix;
     return evaluated ? toArray(evaluated) : [];
   }
 
@@ -121,5 +121,5 @@ const defaultCacheDirFn: CacheDirFn = (params) => [
   params.pathname,
   params.method,
   params.status,
-  ...params.scope,
+  ...params.suffix,
 ];

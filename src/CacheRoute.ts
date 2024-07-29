@@ -17,12 +17,12 @@ export type CacheRouteOptionsOrFn = CacheRouteOptions | CacheRouteOptions['modif
 type UrlPredicate = Parameters<Page['route']>[0];
 
 export class CacheRoute {
-  private scope = '';
+  private suffix = '';
 
   constructor(private page: Page | BrowserContext) {}
 
-  setScope(scope: string) {
-    this.scope = scope;
+  setSuffix(value: string) {
+    this.suffix = value;
   }
 
   async GET(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
@@ -82,6 +82,6 @@ export class CacheRoute {
 
     // todo: merge scope? (wait user feedback)
 
-    return Object.assign({ scope: this.scope }, config, options);
+    return Object.assign({ suffix: this.suffix }, config, options);
   }
 }
