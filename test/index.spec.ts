@@ -107,3 +107,12 @@ test('cache-images', async ({ page }) => {
   expect(json(`localhost/cat2.png/GET/headers.json`)).toHaveProperty('status', 200);
   expectFileExists('localhost/cat2.png/GET/body.png');
 });
+
+test('status', async ({ page }) => {
+  await cacheRoute.GET(page, '**/api/cats', { status: 200 });
+
+  await page.goto('/custom-status/');
+
+  await expect(page.getByRole('list')).toContainText('Whiskers');
+  expectFileExists('localhost/custom-status-api-cats/GET/200/headers.json');
+});

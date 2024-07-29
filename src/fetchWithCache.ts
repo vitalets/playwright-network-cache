@@ -17,9 +17,7 @@ export async function fetchWithCache(route: Route, options: FetchWithCacheOption
 
   const serverResponse = await route.fetch(options.overrides);
 
-  // checking cachedResponse.exists() second time,
-  // b/c it can be created during fetch in another test
-  if (serverResponse.ok() && !cacheEntry.exists()) {
+  if (cacheEntry.shouldCache(serverResponse)) {
     await cacheEntry.saveResponse(serverResponse);
   }
 

@@ -15,6 +15,8 @@ export type CacheEntryOptions = {
   baseDir: string;
   /* Additional folder in cache dir */
   scope?: Scope | ScopeFn;
+  /* HTTP response status to be cached */
+  status?: number;
   /* Cache time to live (in minutes) */
   ttl?: number;
 };
@@ -37,6 +39,10 @@ export class CacheEntry {
     const mtimeMs = headersFileStat?.mtimeMs || 0;
     const age = Date.now() - mtimeMs;
     return age < this.options.ttl * 60 * 1000;
+  }
+
+  shouldCache(response: APIResponse) {
+    return this.matchStatus(response) && !this.exists();
   }
 
   async getResponse() {
@@ -63,6 +69,7 @@ export class CacheEntry {
       url.hostname, // prettier-ignore
       url.pathname,
       this.req.method(),
+      this.options.status?.toString() || '',
       ...this.getScope(),
     ]
       .map((dir) => filenamify(stripLeadingSlash(dir)))
@@ -75,5 +82,10 @@ export class CacheEntry {
     const { scope } = this.options;
     const evaluated = typeof scope === 'function' ? scope(this.req) : scope;
     return evaluated ? toArray(evaluated) : [];
+  }
+
+  private matchStatus(response: APIResponse) {
+    const { status } = this.options;
+    return status ? response.status() === status : response.ok();
   }
 }

@@ -37,10 +37,18 @@ const server = http.createServer(async (req, res) => {
 
   // add cat
   if (req.method === 'POST' && req.url?.startsWith('/api/cats')) {
-    const name = new URLSearchParams(req.url.split('?')[1]).get('name') || '';
-    cats.unshift({ id: cats.length, name, breed: 'Just Added', age: 42 });
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ ok: true }));
+    const name = new URLSearchParams(req.url.split('?')[1]).get('name');
+
+    if (!name) {
+      res.statusCode = 400;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: 'Name is required' }));
+    } else {
+      cats.unshift({ id: cats.length, name, breed: 'Just Added', age: 42 });
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ ok: true }));
+    }
+
     return;
   }
 

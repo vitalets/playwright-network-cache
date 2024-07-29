@@ -41,6 +41,7 @@
   </head>
   <body>
     <h1>Cats Info Page</h1>
+    <div id="error" role="alert" style="color: red; display: none"></div>
     <div id="loader" class="loader"></div>
     <div id="cats">
       <input id="cat-name" type="text" />
@@ -51,6 +52,7 @@
     <script>
       const loader = document.getElementById('loader');
       const content = document.getElementById('cats');
+      const error = document.getElementById('error');
 
       async function fetchCatData() {
         try {
@@ -71,14 +73,18 @@
       }
 
       async function addCat() {
+        error.style.display = 'none';
         const name = document.getElementById('cat-name').value;
         const response = await fetch(`/api/cats?name=${encodeURIComponent(name)}`, {
           method: 'POST',
         });
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          const body = await response.json();
+          error.textContent = body.error || 'unknown error';
+          error.style.display = 'block';
+        } else {
+          await fetchCatData();
         }
-        await fetchCatData();
       }
 
       function renderCats(cats) {
