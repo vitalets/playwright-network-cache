@@ -7,13 +7,12 @@ import { filenamify, stripLeadingSlash, toArray } from '../utils';
 import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
+import { config } from '../config';
 
 type Scope = string | string[] | null | undefined;
 type ScopeFn = (req: Request) => Scope;
 
 export type CacheEntryOptions = {
-  /* Base dir for cache files */
-  baseDir: string;
   /* Additional folder in cache dir */
   scope?: Scope | ScopeFn;
   /* HTTP response status to be cached */
@@ -21,6 +20,17 @@ export type CacheEntryOptions = {
   /* Cache time to live (in minutes) */
   ttl?: number;
 };
+
+type CacheDirFnParams = {
+  req: Request;
+  hostname: string;
+  pathname: string;
+  method: string;
+  status?: number;
+  scope: string[];
+};
+
+export type CacheDirFn = (params: CacheDirFnParams) => (string | number | undefined)[];
 
 export class CacheEntry {
   private cacheDir: string;
@@ -67,19 +77,22 @@ export class CacheEntry {
   }
 
   private buildCacheDir() {
-    const url = new URL(this.req.url());
-    const status = this.options.status?.toString() || '';
-    const dirs = [
-      url.hostname, // prettier-ignore
-      url.pathname,
-      this.req.method(),
-      status,
-      ...this.getScope(),
-    ]
-      .map((dir) => filenamify(stripLeadingSlash(dir)))
+    const { hostname, pathname } = new URL(this.req.url());
+    const params: CacheDirFnParams = {
+      req: this.req,
+      hostname,
+      pathname,
+      method: this.req.method(),
+      status: this.options.status,
+      scope: this.getScope(),
+    };
+    const cacheDirFn = config.cacheDirFn || defaultCacheDirFn;
+
+    const dirs = cacheDirFn(params)
+      .map((dir) => (dir ? filenamify(stripLeadingSlash(dir.toString())) : ''))
       .filter(Boolean);
 
-    return path.join(this.options.baseDir, ...dirs);
+    return path.join(config.baseDir, ...dirs);
   }
 
   private getScope() {
@@ -102,3 +115,11 @@ export class CacheEntry {
     await bodyFile.save(await response.body());
   }
 }
+
+const defaultCacheDirFn: CacheDirFn = (params) => [
+  params.hostname, // prettier-ignore
+  params.pathname,
+  params.method,
+  params.status,
+  ...params.scope,
+];
