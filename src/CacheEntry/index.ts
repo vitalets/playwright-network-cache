@@ -60,8 +60,10 @@ export class CacheEntry {
       statusText: response.statusText(),
       headers: response.headers(),
     };
-    await this.saveHeadersFile(responseInfo);
-    await this.saveBodyFile(responseInfo, response);
+    await Promise.all([
+      this.saveHeadersFile(responseInfo),
+      this.saveBodyFile(responseInfo, response),
+    ]);
   }
 
   private buildCacheDir() {
