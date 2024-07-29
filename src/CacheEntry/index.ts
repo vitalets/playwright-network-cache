@@ -12,6 +12,7 @@ type Scope = string | string[] | null | undefined;
 type ScopeFn = (req: Request) => Scope;
 
 export type CacheEntryOptions = {
+  /* Base dir for cache files */
   baseDir: string;
   /* Additional folder in cache dir */
   scope?: Scope | ScopeFn;
@@ -59,17 +60,18 @@ export class CacheEntry {
       statusText: response.statusText(),
       headers: response.headers(),
     };
-    await this.headersFile.save(responseInfo);
-    await new BodyFile(this.cacheDir, responseInfo).save(await response.body());
+    await this.saveHeadersFile(responseInfo);
+    await this.saveBodyFile(responseInfo, response);
   }
 
   private buildCacheDir() {
     const url = new URL(this.req.url());
+    const status = this.options.status?.toString() || '';
     const dirs = [
       url.hostname, // prettier-ignore
       url.pathname,
       this.req.method(),
-      this.options.status?.toString() || '',
+      status,
       ...this.getScope(),
     ]
       .map((dir) => filenamify(stripLeadingSlash(dir)))
@@ -87,5 +89,14 @@ export class CacheEntry {
   private matchStatus(response: APIResponse) {
     const { status } = this.options;
     return status ? response.status() === status : response.ok();
+  }
+
+  private async saveHeadersFile(responseInfo: ResponseInfo) {
+    await this.headersFile.save(responseInfo);
+  }
+
+  private async saveBodyFile(responseInfo: ResponseInfo, response: APIResponse) {
+    const bodyFile = new BodyFile(this.cacheDir, responseInfo);
+    await bodyFile.save(await response.body());
   }
 }
