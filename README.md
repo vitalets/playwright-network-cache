@@ -8,30 +8,38 @@ Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
 
 <!-- toc -->
 
+- [Example](#example)
 - [Features](#features)
-- [Cache structure](#cache-structure)
 - [Installation](#installation)
 - [Usage](#usage)
-  * [Without response modification](#without-response-modification)
-  * [With response modification](#with-response-modification)
-- [Cache expiration](#cache-expiration)
-- [Showcase](#showcase)
-- [Alternatives](#alternatives)
+- [Examples](#examples)
+  * [Cache requests](#cache-requests)
+  * [Cache requests for 1 hour](#cache-requests-for-1-hour)
+  * [Cache and modify response](#cache-and-modify-response)
+  * [Split cache by query](#split-cache-by-query)
+  * [Split cache by request body](#split-cache-by-request-body)
+- [Configuration](#configuration)
+- [API](#api)
+- [About HAR](#about-har)
+- [Changelog](#changelog)
+    + [0.2.0](#020)
 - [Feedback](#feedback)
 - [License](#license)
 
 <!-- tocstop -->
 
-## Features
+## Example
+Cache GET requests to `/api/cats`:
+```ts
+import { cacheRoute } from 'playwright-network-cache';
 
-* requests are cached in straightforward files structure
-* JSON responses are pretty formatted, you can inspect it for debug
-* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
-* cache is persistent between test-runs, duration is configurable
-* no mess with HAR format
+test('test', async ({ page }) => {
+  await cacheRoute.GET(page, '/api/cats');
+  // ...
+});
+```
 
-## Cache structure
-Example of cache structure created for GET request to `https://example.com/api-cats`:
+Cache structure:
 ```
 .network-cache
 └── example.com
@@ -41,6 +49,15 @@ Example of cache structure created for GET request to `https://example.com/api-c
             └── body.json
 ```
 
+## Features
+
+* requests are cached in straightforward files structure
+* JSON responses are pretty formatted, you can inspect it for debug
+* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
+* cache is persistent between test-runs, duration is configurable
+* no mess with HAR format
+
+
 ## Installation
 Install from npm:
 ```
@@ -49,35 +66,35 @@ npm i -D playwright-network-cache
 
 ## Usage
 
-Cache requests to `/api/cats`:
+
+## Examples
+
+### Cache requests
 ```ts
-import { test } from '@playwright/test';
-import { withCache } from 'playwright-network-cache';
+import { cacheRoute } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
-  await withCache(page, '/api/cats');
+  await cacheRoute.GET(page, '/api/cats');
   // ...
 });
 ```
 
-Cache requests to `/api/cats` for 1 hour:
+### Cache requests for 1 hour
 ```ts
-import { test } from '@playwright/test';
-import { withCache } from 'playwright-network-cache';
+import { cacheRoute } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
-  await withCache(page, '/api/cats', { ttl: 60 });
+  await cacheRoute.GET(page, '/api/cats', { ttl: 60 });
   // ...
 });
 ```
 
-Modify cached response:
-```js
-import { test } from '@playwright/test';
-import { withCache } from 'playwright-network-cache';
+### Cache and modify response
+```ts
+import { cacheRoute } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
-  await withCache(page, '/api/cats', async (route, response) => {
+  await cacheRoute.GET(page, '/api/cats', async (route, response) => {
     const json = await response.json();
     json[0].name = 'Kitty-1';
     await route.fulfill({ json });
@@ -86,30 +103,58 @@ test('test', async ({ page }) => {
 });
 ```
 
-Match by request body:
+### Split cache by query
 ```ts
-import { test } from '@playwright/test';
-import { withCache } from 'playwright-network-cache';
+import { cacheRoute } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
-  // ...
-  await withCache(page, '/api/cats', { 
-    key: req => req.postDataJSON().email
+  await cacheRoute.GET(page, '/api/cats*', {
+    scope: req => new URL(req.url()).searchParams.toString()
   });
+  // ...
 });
 ```
-This will catch request with body:
+Having the following requests:
 ```
-{
-  email: 'user1@example.com'
-}
+GET /api/cats?foo=1
+GET /api/cats?foo=2
 ```
-and generate the following cache structure:
+Cache structure will be:
 ```
 .network-cache
 └── example.com
     └── api-cats
         └── GET
+            ├── foo=1
+            │   ├── headers.json
+            │   └── body.json
+            └── foo=2
+                ├── headers.json
+                └── body.json
+```
+
+### Split cache by request body
+```ts
+import { cacheRoute } from 'playwright-network-cache';
+
+test('test', async ({ page }) => {
+  await cacheRoute.POST(page, '/api/cats', {
+    scope: req => req.postDataJSON().email
+  });
+  // ...
+});
+```
+Having the following requests:
+```
+POST -d '{"email":"user1@example.com"}' /api/cats
+POST -d '{"email":"user2@example.com"}' /api/cats
+```
+Cache structure will be:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── POST
             ├── user1@example.com
             │   ├── headers.json
             │   └── body.json
@@ -118,10 +163,10 @@ and generate the following cache structure:
                 └── body.json
 ```
 
-> Default caching prefix is: `hostname` + `pathname` + `method` + `query`.
-
 ## Configuration
-Caching options can be changed in Playwright config:
+To use network cache with default options, no configuration is required.
+
+If you want to change the defaults, you can provide it in `playwright.config.js`:
 ```ts
 import { defineConfig } from '@playwright/test';
 import { defineNetworkCacheConfig } from 'playwright-network-cache';
@@ -136,10 +181,13 @@ export default defineConfig({
 });
 ```
 
-## About HAR
-In my opinion, [HAR](https://en.wikipedia.org/wiki/HAR_(file_format)) is not the best format for fine-grained control of network in e2e testing. There are several issues in Playwright repo showing how people struggle with it: [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754), [#29190](https://github.com/microsoft/playwright/issues/29190).
+## API
+tbd
 
-This library intentionally does not use HAR. Instead, it generates simple file-based cache structure, giving you full control of what and how is cached.
+## About HAR
+[HAR](https://en.wikipedia.org/wiki/HAR_(file_format)) is not the best format for fine-grained control of network in e2e testing. There are several issues in Playwright repo showing how people struggle with it: [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754), [#29190](https://github.com/microsoft/playwright/issues/29190).
+
+This library intentionally does not use HAR. Instead, it generates straightforward file-based cache structure, giving you full control of what and how is cached.
 
 Alternatively, you can check the following HAR-based libraries:
 * [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - does the same things but relies on HAR format.
