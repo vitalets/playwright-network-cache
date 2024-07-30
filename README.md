@@ -6,6 +6,8 @@
 
 Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
 
+**This project is under development yet**
+
 <!-- toc -->
 
 - [Example](#example)
