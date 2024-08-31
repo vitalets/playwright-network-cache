@@ -5,8 +5,9 @@
 [![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
 
 Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
+This can greatly speed up your test execution.
 
-**This project is under development**
+**!This project is under development!**
 
 <!-- toc -->
 
@@ -30,6 +31,15 @@ Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
 
 <!-- tocstop -->
 
+## Features
+
+* Network requests are automatically cached during test run
+* Cache is stored as a straightforward files structure
+* Cached responses can be modified in tests
+* Cache persists between test runs
+* JSON responses as pretty formatted, easy to inspect data
+* No mess with HAR format, see [motivation](#motivation)
+
 ## Example
 Cache GET requests to `/api/cats`:
 ```ts
@@ -37,11 +47,12 @@ import { cacheRoute } from 'playwright-network-cache';
 
 test('test', async ({ page }) => {
   await cacheRoute.GET(page, '/api/cats');
+  await page.goto('https://my-cats-website.com')
   // ...
 });
 ```
 
-Cache structure:
+Generated cache structure:
 ```
 .network-cache
 └── example.com
@@ -50,15 +61,7 @@ Cache structure:
             ├── headers.json
             └── body.json
 ```
-
-## Features
-
-* requests are cached in straightforward files structure
-* JSON responses are pretty formatted, you can inspect it for debug
-* you can modify cached responses (see [#29190](https://github.com/microsoft/playwright/issues/29190))
-* cache is persistent between test-runs, duration is configurable
-* no mess with HAR format
-
+On subsequent runs this test will use cached response instead of making real API call.
 
 ## Installation
 Install from npm:
@@ -67,7 +70,7 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-
+tbd
 
 ## Examples
 
@@ -186,11 +189,17 @@ export default defineConfig({
 ## API
 tbd
 
-## About HAR
-[HAR](https://en.wikipedia.org/wiki/HAR_(file_format)) is not the best format for fine-grained control of network in e2e testing. There are several issues in Playwright repo showing how people struggle with it: [#21405](https://github.com/microsoft/playwright/issues/21405), [#30754](https://github.com/microsoft/playwright/issues/30754), [#29190](https://github.com/microsoft/playwright/issues/29190).
+## Motivation
+Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
+But when you need more fine-grained control of network, it becomes messy. Check out these issues where people struggle with HAR: 
 
-This library intentionally does not use HAR. Instead, it generates straightforward file-based cache structure, giving you full control of what and how is cached.
+- [#21405](https://github.com/microsoft/playwright/issues/21405)
+- [#30754](https://github.com/microsoft/playwright/issues/30754)
+- [#29190](https://github.com/microsoft/playwright/issues/29190)
 
+This library intentionally does not use HAR. Instead, it generates file-based cache structure, giving you full control of what and how is cached.
+
+## Alternatives
 Alternatively, you can check the following HAR-based libraries:
 * [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - does the same things but relies on HAR format.
 * [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR, looks abandoned.
