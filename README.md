@@ -4,8 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/playwright-network-cache)](https://www.npmjs.com/package/playwright-network-cache)
 [![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
 
-Cache and mock network requests in [Playwright](https://playwright.dev/) tests.
-This can greatly speed up your test execution.
+Speed up your [Playwright](https://playwright.dev/) tests by cache and mock network requests.
 
 **!This project is under development!**
 
@@ -108,7 +107,7 @@ test('test', async ({ page }) => {
 });
 ```
 
-### Split cache by query
+### Split cache by request query params
 ```ts
 import { cacheRoute } from 'playwright-network-cache';
 
