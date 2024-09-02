@@ -37,6 +37,7 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 * Cached responses can be modified in tests
 * Cache persists between test runs
 * JSON responses as pretty formatted, easy to inspect data
+* No manual mocks maintenance
 * No mess with HAR format, see [motivation](#motivation)
 
 ## Example
