@@ -200,9 +200,10 @@ But when you need more fine-grained control of network, it becomes messy. Check 
 This library intentionally does not use HAR. Instead, it generates file-based cache structure, giving you full control of what and how is cached.
 
 ## Alternatives
-Alternatively, you can check the following HAR-based libraries:
-* [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - does the same things but relies on HAR format.
-* [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR, looks abandoned.
+Alternatively, you can check the following packages:
+* [playwright-intercept](https://github.com/alectrocute/playwright-intercept) - uses Cypress-influenced API
+* [playwright-advanced-har](https://github.com/NoamGaash/playwright-advanced-har) - uses HAR format
+* [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR format, looks abandoned
 
 ## Changelog
 
