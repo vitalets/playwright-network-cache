@@ -1,42 +1,46 @@
-import { test, expect } from '@playwright/test';
-import { cacheRoute } from '../src';
-import { json, expectFileExists } from './helpers';
+import { expect, Page } from '@playwright/test';
+import { test } from './fixtures';
 
-test('without options', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats');
+test('without options', async ({ page, cacheRoute, json }) => {
+  await cacheRoute.GET('**/api/cats');
 
-  await page.goto('/no-opts/');
+  await openHomePage(page);
 
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/no-opts-api-cats/GET/headers.json`)).toHaveProperty('status', 200);
+  expect(json(`localhost/api-cats/GET/headers.json`)).toHaveProperty('status', 200);
   // note: .toHaveProperty('[0].id', 1) does not work in PW 1.35
-  expect(json(`localhost/no-opts-api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
+  expect(json(`localhost/api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
 });
 
-test('suffix', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', { suffix: 'foo' });
+test('appendDir', async ({ page, cacheRoute, json }) => {
+  await cacheRoute.GET('**/api/cats', { appendDir: 'foo' });
 
-  await page.goto('/custom-suffix/');
+  await openHomePage(page);
 
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/custom-suffix-api-cats/GET/foo/headers.json`)).toHaveProperty(
-    'status',
-    200,
-  );
+  expect(json(`localhost/api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
 });
 
-test('setSuffix', async ({ page }) => {
-  cacheRoute.setSuffix(page, 'bar');
-  await cacheRoute.GET(page, '**/api/cats');
+test('setGroupDir', async ({ page, cacheRoute, json }) => {
+  cacheRoute.setGroupDir('bar');
+  await cacheRoute.GET('**/api/cats');
 
-  await page.goto('/set-suffix/');
+  await openHomePage(page);
 
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-  expect(json(`localhost/set-suffix-api-cats/GET/bar/headers.json`)).toHaveProperty('status', 200);
+  expect(json(`localhost/api-cats/GET/bar/headers.json`)).toHaveProperty('status', 200);
 });
 
-test('modify response (pass options)', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', {
+test('setCheckpointDir', async ({ page, cacheRoute, json }) => {
+  await cacheRoute.GET('**/api/cats');
+
+  await openHomePage(page);
+  cacheRoute.setCheckpointDir('bar');
+  await openHomePage(page);
+
+  expect(json(`localhost/api-cats/GET/headers.json`)).toHaveProperty('status', 200);
+  expect(json(`localhost/api-cats/GET/bar/headers.json`)).toHaveProperty('status', 200);
+});
+
+test('modify response (pass options)', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('**/api/cats', {
     modify: async (route, response) => {
       const json = await response.json();
       json[0].name = 'Kitty';
@@ -44,72 +48,63 @@ test('modify response (pass options)', async ({ page }) => {
     },
   });
 
-  await page.goto('/modify-via-opts/');
+  await openHomePage(page);
   await expect(page.getByRole('list')).toContainText('Kitty');
 
   await page.goto('/modify-via-opts/');
   await expect(page.getByRole('list')).toContainText('Kitty');
 });
 
-test('modify response (pass function)', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
-    const json = await response.json();
-    json[0].name = 'Kitty';
-    await route.fulfill({ json });
-  });
-
-  await page.goto('/modify-via-fn/');
-  await expect(page.getByRole('list')).toContainText('Kitty');
-
-  await page.goto('/modify-via-fn/');
-  await expect(page.getByRole('list')).toContainText('Kitty');
-});
-
-test('re-define route', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
+test('re-define route', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('**/api/cats', async (route, response) => {
     const json = await response.json();
     json[0].name = 'Kitty-1';
     await route.fulfill({ json });
   });
 
-  await page.goto('/re-define/');
+  await openHomePage(page);
   await expect(page.getByRole('list')).toContainText('Kitty-1');
 
-  await cacheRoute.GET(page, '**/api/cats', async (route, response) => {
+  await cacheRoute.GET('**/api/cats', async (route, response) => {
     const json = await response.json();
     json[0].name = 'Kitty-2';
     await route.fulfill({ json });
   });
 
-  await page.goto('/re-define/');
+  await openHomePage(page);
   await expect(page.getByRole('list')).toContainText('Kitty-2');
 });
 
-test('apply to context', async ({ page, context }) => {
-  await cacheRoute.GET(context, '**/api/cats');
+test('cache-images', async ({ page, cacheRoute, json, exists }) => {
+  await cacheRoute.GET('**/api/cats');
+  await cacheRoute.GET('/cat*');
 
-  await page.goto('/context/');
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-});
-
-test('cache-images', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats');
-  await cacheRoute.GET(page, '/cat*');
-
-  await page.goto('/');
+  await openHomePage(page);
 
   expect(json(`localhost/cat1.webp/GET/headers.json`)).toHaveProperty('status', 200);
-  expectFileExists('localhost/cat1.webp/GET/body.webp');
+  expect(exists('localhost/cat1.webp/GET/body.webp')).toBe(true);
 
   expect(json(`localhost/cat2.png/GET/headers.json`)).toHaveProperty('status', 200);
-  expectFileExists('localhost/cat2.png/GET/body.png');
+  expect(exists('localhost/cat2.png/GET/body.png')).toBe(true);
 });
 
-test('status', async ({ page }) => {
-  await cacheRoute.GET(page, '**/api/cats', { status: 200 });
+test('http status (matched)', async ({ page, cacheRoute, exists }) => {
+  await cacheRoute.GET('**/api/cats', { httpStatus: 200 });
 
-  await page.goto('/custom-status/');
+  await openHomePage(page);
 
-  await expect(page.getByRole('list')).toContainText('Whiskers');
-  expectFileExists('localhost/custom-status-api-cats/GET/200/headers.json');
+  expect(exists('localhost/api-cats/GET/200/headers.json')).toBe(true);
 });
+
+test('http status (not matched, no file saved)', async ({ page, cacheRoute, exists }) => {
+  await cacheRoute.GET('**/api/cats', { httpStatus: 500 });
+
+  await openHomePage(page);
+
+  expect(exists('localhost/api-cats/GET/500/headers.json')).toBe(false);
+});
+
+async function openHomePage(page: Page) {
+  await page.goto('/');
+  await expect(page.getByRole('list').getByRole('listitem').nth(1)).toBeVisible();
+}

@@ -1,10 +1,4 @@
 import { defineConfig } from '@playwright/test';
-import { defineNetworkCacheConfig } from './src';
-
-export const cacheConfig = defineNetworkCacheConfig({
-  baseDir: 'test/.network-cache',
-  ttl: 10,
-});
 
 const baseURL = 'http://localhost:3000';
 

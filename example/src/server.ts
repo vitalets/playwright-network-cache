@@ -44,7 +44,7 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ error: 'Name is required' }));
     } else {
-      cats.unshift({ id: cats.length, name, breed: 'Just Added', age: 42 });
+      cats.unshift({ id: cats.length + 1, name, breed: 'Just Added', age: 42 });
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ ok: true }));
     }

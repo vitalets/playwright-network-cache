@@ -20,6 +20,10 @@ export function toArray<T>(value: T | T[]) {
   return Array.isArray(value) ? value : [value];
 }
 
-export function stripLeadingSlash(s: string) {
-  return s.replace(/^\/+/, '');
+export function toFunction<T, K>(value: T | ((...args: K[]) => T)) {
+  return typeof value === 'function' ? (value as (...args: K[]) => T) : () => value;
+}
+
+export function trimSlash(s: string) {
+  return s.replace(/^\/+|\/+$/, '');
 }
