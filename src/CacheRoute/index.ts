@@ -27,14 +27,6 @@ export class CacheRoute {
     this.extraDir = toArray(options.extraDir || []);
   }
 
-  noCache() {
-    this.options.noCache = true;
-  }
-
-  forceUpdate() {
-    this.options.forceUpdate = true;
-  }
-
   async GET(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
     await this.registerCachedRoute('GET', url, optionsOrFn);
   }
