@@ -2,20 +2,19 @@ import { expect } from '@playwright/test';
 import { test } from './fixtures';
 
 test('load cats', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats**');
+  await cacheRoute.GET('/api/cats*');
 
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 });
 
 test('add cat (success)', async ({ page, cacheRoute }) => {
-  await cacheRoute.ALL('/api/cats**');
+  await cacheRoute.ALL('/api/cats*');
 
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 
-  cacheRoute.setCheckpointDir('after-add-cat');
-  // await cacheRoute.POST('/api/cats**');
+  cacheRoute.extraDir.push('after-add-cat');
 
   await page.getByRole('textbox').fill('Tomas');
   await page.getByRole('button', { name: 'Add Cat' }).click();
@@ -23,13 +22,14 @@ test('add cat (success)', async ({ page, cacheRoute }) => {
   await expect(page.getByRole('list')).toContainText('Tomas');
 });
 
-test('add cat (error)', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats**');
+test('add cat (error)', async ({ page, cacheRoute }, testInfo) => {
+  cacheRoute.extraDir.push(testInfo.title);
+  await cacheRoute.GET('/api/cats*');
 
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 
-  await cacheRoute.POST('/api/cats**', { httpStatus: 400 });
+  await cacheRoute.POST('/api/cats*', { httpStatus: 400 });
 
   await page.getByRole('textbox').fill('');
   await page.getByRole('button', { name: 'Add Cat' }).click();

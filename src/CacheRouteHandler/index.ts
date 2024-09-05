@@ -3,30 +3,23 @@
  */
 import path from 'node:path';
 import { APIResponse, Request, Route } from '@playwright/test';
-import { filenamify, toFunction, trimSlash } from '../utils';
+import { filenamify, toArray, toFunction, trimSlash } from '../utils';
 import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
 import { BuildCacheDirArg, ResolvedCacheRouteOptions } from '../CacheRoute/options';
 import { HttpMethod } from '../CacheRoute';
 
-type CacheRouteHandlerOptions = ResolvedCacheRouteOptions & {
-  httpMethod: HttpMethod;
-  checkpointDir: string;
-};
-
 export class CacheRouteHandler {
   private req: Request;
-  private cacheDir: string;
-  private headersFile: HeadersFile;
+  private cacheDir: string = '';
 
   constructor(
+    private httpMethod: HttpMethod,
     private route: Route,
-    private options: CacheRouteHandlerOptions,
+    private options: ResolvedCacheRouteOptions,
   ) {
     this.req = route.request();
-    this.cacheDir = this.buildCacheDir();
-    this.headersFile = new HeadersFile(this.cacheDir);
   }
 
   async handle() {
@@ -35,7 +28,11 @@ export class CacheRouteHandler {
       return;
     }
 
-    const response = this.isCacheHit() ? await this.fetchFromCache() : await this.fetchFromServer();
+    this.buildCacheDir();
+
+    const response = this.isCacheHit()
+      ? await this.fetchFromCache() // prettier-ignore
+      : await this.fetchFromServer();
 
     await this.fulfillRoute(response);
   }
@@ -45,8 +42,7 @@ export class CacheRouteHandler {
   }
 
   private isRequestMatchedByMethod() {
-    const { httpMethod } = this.options;
-    return httpMethod === 'ALL' || httpMethod === this.req.method();
+    return this.httpMethod === 'ALL' || this.httpMethod === this.req.method();
   }
 
   private isRequestMatchedByFn() {
@@ -71,14 +67,14 @@ export class CacheRouteHandler {
   }
 
   private async fetchFromCache() {
-    const responseInfo = await this.headersFile.read();
+    const responseInfo = await new HeadersFile(this.cacheDir).read();
     const bodyFile = new BodyFile(this.cacheDir, responseInfo);
     const body = await bodyFile.read();
     return new SyntheticApiResponse(responseInfo, body);
   }
 
   private isExpired() {
-    const headersFileStat = this.headersFile.stat();
+    const headersFileStat = new HeadersFile(this.cacheDir).stat();
     if (this.options.ttlMinutes === undefined) return !headersFileStat;
     const lastModified = headersFileStat?.mtimeMs || 0;
     const age = Date.now() - lastModified;
@@ -114,14 +110,18 @@ export class CacheRouteHandler {
 
   private buildCacheDir() {
     const { hostname, pathname } = new URL(this.req.url());
+    const extraDir = toArray(this.options.extraDir || [])
+      .map((item) => {
+        return toFunction(item)(this.req);
+      })
+      .flat();
+
     const ctx: BuildCacheDirArg = {
       hostname,
       pathname,
       httpMethod: this.req.method(),
-      groupDir: this.options.groupDir,
-      checkpointDir: this.options.checkpointDir,
+      extraDir,
       httpStatus: this.options.httpStatus,
-      appendDir: toFunction(this.options.appendDir)(this.req),
       req: this.req,
     };
 
@@ -131,7 +131,7 @@ export class CacheRouteHandler {
       .map((dir) => (dir ? filenamify(trimSlash(dir.toString())) : ''))
       .filter(Boolean);
 
-    return path.join(this.options.baseDir, ...dirs);
+    this.cacheDir = path.join(this.options.baseDir, ...dirs);
   }
 
   private matchHttpStatus(response: APIResponse) {
@@ -140,7 +140,7 @@ export class CacheRouteHandler {
   }
 
   private async saveHeadersFile(responseInfo: ResponseInfo) {
-    await this.headersFile.save(responseInfo);
+    await new HeadersFile(this.cacheDir).save(responseInfo);
   }
 
   private async saveBodyFile(responseInfo: ResponseInfo, response: APIResponse) {

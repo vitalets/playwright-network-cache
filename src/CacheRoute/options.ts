@@ -4,10 +4,8 @@ import { defaults } from './defaults';
 export type CacheRouteOptions = {
   /* Base directory for cache files */
   baseDir?: string;
-  /* Additional directory after {httpMethod} */
-  groupDir?: string | string[];
-  /* Additional directory to append after {httpStatus} */
-  appendDir?: string | string[] | ((req: Request) => string | string[]);
+  /* Extra directory for cache files */
+  extraDir?: string | string[] | ((req: Request) => string | string[]);
   /* Additional matching function for request */
   match?: (req: Request) => boolean | void;
   /* Match responses with particular HTTP status */
@@ -22,8 +20,6 @@ export type CacheRouteOptions = {
   noCache?: boolean;
   /* Disable caching, always request from server and update cached files */
   forceUpdate?: boolean;
-  /** Save request headers and body next to response */
-  saveRequest?: boolean;
   /** Function to build cache dir for fine-grained control */
   buildCacheDir?: (ctx: BuildCacheDirArg) => (string | string[] | number | undefined)[];
 };
@@ -34,10 +30,8 @@ export type BuildCacheDirArg = {
   hostname: string;
   pathname: string;
   httpMethod: string;
-  groupDir?: string | string[];
-  checkpointDir?: string;
+  extraDir?: string[];
   httpStatus?: number;
-  appendDir?: string | string[];
   req: Request;
 };
 
