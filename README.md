@@ -64,25 +64,25 @@ npm i -D playwright-network-cache
 
 ## Usage
 1. Define `cacheRoute` fixture using [`test.extend()`](https://playwright.dev/docs/test-fixtures#creating-a-fixture) method:
-  ```ts
-  // fixtures.ts
-  import { test as base } from '@playwright/test';
-  import { CacheRoute } from 'playwright-network-cache';
+    ```ts
+    // fixtures.ts
+    import { test as base } from '@playwright/test';
+    import { CacheRoute } from 'playwright-network-cache';
 
-  export const test = base.extend<{ cacheRoute: CacheRoute }>({
-    cacheRoute: async ({ page }, use) => {
-      await use(new CacheRoute(page, { /* cache options */ }));
-    }
-  });
-  ```
+    export const test = base.extend<{ cacheRoute: CacheRoute }>({
+      cacheRoute: async ({ page }, use) => {
+        await use(new CacheRoute(page, { /* cache options */ }));
+      }
+    });
+    ```
 
 2. Use `cacheRoute` fixture in tests:
-  ```ts
-  test('test', async ({ page, cacheRoute }) => {
-    await cacheRoute.GET('/api/cats');
-    // ... all GET requests to /api/cats will be cached
-  });
-  ```
+    ```ts
+    test('test', async ({ page, cacheRoute }) => {
+      await cacheRoute.GET('/api/cats');
+      // ... all GET requests to /api/cats will be cached
+    });
+    ```
 
 More examples below.
 
