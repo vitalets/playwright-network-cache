@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { test as base } from '@playwright/test';
+import { test as base, expect, Page } from '@playwright/test';
 import { CacheRoute } from '../src';
 
 type Fixtures = {
   cacheRoute: CacheRoute;
   json: (relPath: string) => Record<string, unknown>;
   exists: (relPath: string) => boolean;
+  resolve: (relPath: string) => string;
 };
 
 export const test = base.extend<Fixtures>({
@@ -17,17 +18,27 @@ export const test = base.extend<Fixtures>({
       }),
     );
   },
-  json: async ({ cacheRoute }, use) => {
+  resolve: async ({ cacheRoute }, use) => {
     await use((relPath: string) => {
-      const fullPath = path.join(cacheRoute.options.baseDir!, relPath);
+      return path.join(cacheRoute.options.baseDir, relPath);
+    });
+  },
+  json: async ({ resolve }, use) => {
+    await use((relPath: string) => {
+      const fullPath = resolve(relPath);
       const content = fs.readFileSync(fullPath, 'utf8');
       return JSON.parse(content);
     });
   },
-  exists: async ({ cacheRoute }, use) => {
+  exists: async ({ resolve }, use) => {
     await use((relPath: string) => {
-      const fullPath = path.join(cacheRoute.options.baseDir!, relPath);
+      const fullPath = resolve(relPath);
       return fs.existsSync(fullPath);
     });
   },
 });
+
+export async function openHomePage(page: Page) {
+  await page.goto('/');
+  await expect(page.getByRole('list').getByRole('listitem').nth(1)).toBeVisible();
+}

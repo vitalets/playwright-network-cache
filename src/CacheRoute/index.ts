@@ -7,7 +7,7 @@
  * But it's very semantic in usage: cacheRoute.GET('/api/cats')
  */
 
-import { BrowserContext, Page, Request } from '@playwright/test';
+import { BrowserContext, Page } from '@playwright/test';
 import { CacheRouteOptions } from './options';
 import { defaults } from './defaults';
 import { CacheRouteHandler } from '../CacheRouteHandler';
@@ -16,15 +16,16 @@ import { toArray } from '../utils';
 type UrlPredicate = Parameters<Page['route']>[0];
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'ALL';
 type CacheRouteOptionsOrFn = CacheRouteOptions | CacheRouteOptions['modify'];
+export type ResolvedCacheRouteOptions = ReturnType<CacheRoute['resolveConstructorOptions']>;
 
 export class CacheRoute {
-  public extraDir: (string | ((req: Request) => string | string[]))[];
+  public options: ResolvedCacheRouteOptions;
 
   constructor(
     protected page: Page | BrowserContext,
-    public options: CacheRouteOptions = {},
+    options: CacheRouteOptions = {},
   ) {
-    this.extraDir = toArray(options.extraDir || []);
+    this.options = this.resolveConstructorOptions(options);
   }
 
   async GET(url: UrlPredicate, optionsOrFn?: CacheRouteOptionsOrFn) {
@@ -61,20 +62,25 @@ export class CacheRoute {
     optionsOrFn?: CacheRouteOptionsOrFn,
   ) {
     await this.page.route(url, async (route) => {
-      const options = this.resolveOptions(optionsOrFn);
+      const options = this.resolveMethodOptions(optionsOrFn);
       await new CacheRouteHandler(httpMethod, route, options).handle();
     });
   }
 
-  private resolveOptions(optionsOrFn?: CacheRouteOptionsOrFn) {
-    const providedOptions =
-      typeof optionsOrFn === 'function' ? { modify: optionsOrFn } : optionsOrFn;
+  private resolveConstructorOptions(options: CacheRouteOptions) {
+    const extraDir = options.extraDir ? toArray(options.extraDir) : [];
+    return { ...defaults, ...options, extraDir };
+  }
+
+  private resolveMethodOptions(optionsOrFn: CacheRouteOptionsOrFn = {}) {
+    const methodOptions = typeof optionsOrFn === 'function' ? { modify: optionsOrFn } : optionsOrFn;
 
     // extraDir is the only prop that is merged, not overwritten
-    const extraDir = providedOptions?.extraDir
-      ? this.extraDir.concat(toArray(providedOptions.extraDir))
-      : this.extraDir;
+    const extraDir = this.options.extraDir.slice();
+    if (methodOptions.extraDir) {
+      extraDir.push(...toArray(methodOptions.extraDir));
+    }
 
-    return Object.assign({}, defaults, this.options, providedOptions, { extraDir });
+    return { ...this.options, ...methodOptions, extraDir };
   }
 }

@@ -14,7 +14,7 @@ test('add cat (success)', async ({ page, cacheRoute }) => {
   await page.goto('/');
   await expect(page.getByRole('list')).toContainText('Whiskers');
 
-  cacheRoute.extraDir.push('after-add-cat');
+  cacheRoute.options.extraDir.push('after-add-cat');
 
   await page.getByRole('textbox').fill('Tomas');
   await page.getByRole('button', { name: 'Add Cat' }).click();
@@ -23,7 +23,7 @@ test('add cat (success)', async ({ page, cacheRoute }) => {
 });
 
 test('add cat (error)', async ({ page, cacheRoute }, testInfo) => {
-  cacheRoute.extraDir.push(testInfo.title);
+  cacheRoute.options.extraDir.push(testInfo.title);
   await cacheRoute.GET('/api/cats*');
 
   await page.goto('/');

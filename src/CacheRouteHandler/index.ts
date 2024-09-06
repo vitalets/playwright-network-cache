@@ -7,8 +7,8 @@ import { filenamify, toArray, toFunction, trimSlash } from '../utils';
 import { HeadersFile, ResponseInfo } from './HeadersFile';
 import { BodyFile } from './BodyFile';
 import { SyntheticApiResponse } from './SyntheticApiResponse';
-import { BuildCacheDirArg, ResolvedCacheRouteOptions } from '../CacheRoute/options';
-import { HttpMethod } from '../CacheRoute';
+import { BuildCacheDirArg } from '../CacheRoute/options';
+import { HttpMethod, ResolvedCacheRouteOptions } from '../CacheRoute';
 
 export class CacheRouteHandler {
   private req: Request;

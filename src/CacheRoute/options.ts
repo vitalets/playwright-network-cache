@@ -1,5 +1,4 @@
 import { APIResponse, Request, Route } from '@playwright/test';
-import { defaults } from './defaults';
 
 export type CacheRouteOptions = {
   /* Base directory for cache files */
@@ -23,8 +22,6 @@ export type CacheRouteOptions = {
   /** Function to build cache dir for fine-grained control */
   buildCacheDir?: (ctx: BuildCacheDirArg) => (string | string[] | number | undefined)[];
 };
-
-export type ResolvedCacheRouteOptions = typeof defaults & CacheRouteOptions;
 
 export type BuildCacheDirArg = {
   hostname: string;

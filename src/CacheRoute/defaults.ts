@@ -3,7 +3,7 @@ import { CacheRouteOptions } from './options';
 export const defaults = {
   baseDir: '.network-cache',
   // Default template is:
-  // {hostname}/{pathname}/{httpMethod}/{extraCacheDir}/{httpStatus}
+  // {hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
   buildCacheDir: (ctx) => [
     ctx.hostname, // prettier-ignore
     ctx.pathname,

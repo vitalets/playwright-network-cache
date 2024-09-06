@@ -1,5 +1,5 @@
-import { expect, Page } from '@playwright/test';
-import { test } from './fixtures';
+import { expect } from '@playwright/test';
+import { openHomePage, test } from './fixtures';
 
 test('without options', async ({ page, cacheRoute, json }) => {
   await cacheRoute.GET('/api/cats');
@@ -11,25 +11,37 @@ test('without options', async ({ page, cacheRoute, json }) => {
   expect(json(`localhost/api-cats/GET/body.json`)[0]).toHaveProperty('id', 1);
 });
 
-test('extra dir for request', async ({ page, cacheRoute, json }) => {
+test('extra dir for request', async ({ page, cacheRoute, exists }) => {
   await cacheRoute.GET('/api/cats', { extraDir: 'foo' });
-
   await openHomePage(page);
 
-  expect(json(`localhost/api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
+  await cacheRoute.GET('/api/cats', { extraDir: ['bar'] });
+  await openHomePage(page);
+
+  expect(exists(`localhost/api-cats/GET/foo/headers.json`)).toBe(true);
+  expect(exists(`localhost/api-cats/GET/bar/headers.json`)).toBe(true);
 });
 
 test('extra dir for test', async ({ page, cacheRoute, json }) => {
-  cacheRoute.extraDir.push('foo');
+  cacheRoute.options.extraDir.push('foo');
   await cacheRoute.GET('/api/cats');
 
   await openHomePage(page);
 
-  cacheRoute.extraDir.push('bar');
+  cacheRoute.options.extraDir.push('bar');
   await openHomePage(page);
 
   expect(json(`localhost/api-cats/GET/foo/headers.json`)).toHaveProperty('status', 200);
   expect(json(`localhost/api-cats/GET/foo/bar/headers.json`)).toHaveProperty('status', 200);
+});
+
+test('baseDir', async ({ page, cacheRoute, exists }) => {
+  cacheRoute.options.baseDir += '/foo';
+  await cacheRoute.GET('/api/cats');
+
+  await openHomePage(page);
+
+  expect(exists(`../foo/localhost/api-cats/GET/headers.json`)).toBe(true);
 });
 
 test('modify response (pass options)', async ({ page, cacheRoute }) => {
@@ -112,8 +124,3 @@ test('split by request params', async ({ page, cacheRoute, json }) => {
   expect(json(`localhost/api-cats/GET/foo=1/headers.json`)).toHaveProperty('status', 200);
   expect(json(`localhost/api-cats/GET/foo=2/headers.json`)).toHaveProperty('status', 200);
 });
-
-async function openHomePage(page: Page) {
-  await page.goto('/');
-  await expect(page.getByRole('list').getByRole('listitem').nth(1)).toBeVisible();
-}
