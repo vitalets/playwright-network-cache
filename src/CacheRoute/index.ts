@@ -56,7 +56,7 @@ export class CacheRoute {
     await this.registerCachedRoute('ALL', url, optionsOrFn);
   }
 
-  private async registerCachedRoute(
+  protected async registerCachedRoute(
     httpMethod: HttpMethod,
     url: UrlPredicate,
     optionsOrFn?: CacheRouteOptionsOrFn,
@@ -67,12 +67,12 @@ export class CacheRoute {
     });
   }
 
-  private resolveConstructorOptions(options: CacheRouteOptions) {
+  protected resolveConstructorOptions(options: CacheRouteOptions) {
     const extraDir = options.extraDir ? toArray(options.extraDir) : [];
     return { ...defaults, ...options, extraDir };
   }
 
-  private resolveMethodOptions(optionsOrFn: CacheRouteOptionsOrFn = {}) {
+  protected resolveMethodOptions(optionsOrFn: CacheRouteOptionsOrFn = {}) {
     const methodOptions = typeof optionsOrFn === 'function' ? { modify: optionsOrFn } : optionsOrFn;
 
     // extraDir is the only prop that is merged, not overwritten
