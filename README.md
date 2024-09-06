@@ -210,7 +210,7 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 });
 ```
 
-> **Note:** When cache is disabled, response is still handled by `modify` functions
+> **Note:** When cache is disabled, response is still transformed by `modify` functions
 
 ### Force cache update
 To force updating cache files for a **single test**, set `cacheRoute.options.forceUpdate` to `true`:
