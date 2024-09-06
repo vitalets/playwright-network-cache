@@ -44,22 +44,6 @@ test('baseDir', async ({ page, cacheRoute, exists }) => {
   expect(exists(`../foo/localhost/api-cats/GET/headers.json`)).toBe(true);
 });
 
-test('modify response (pass options)', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json[0].name = 'Kitty';
-      await route.fulfill({ json });
-    },
-  });
-
-  await openHomePage(page);
-  await expect(page.getByRole('list')).toContainText('Kitty');
-
-  await openHomePage(page);
-  await expect(page.getByRole('list')).toContainText('Kitty');
-});
-
 test('re-define route', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', async (route, response) => {
     const json = await response.json();

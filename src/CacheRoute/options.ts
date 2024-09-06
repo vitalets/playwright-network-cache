@@ -1,5 +1,7 @@
 import { APIResponse, Request, Route } from '@playwright/test';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type CacheRouteOptions = {
   /* Base directory for cache files */
   baseDir?: string;
@@ -15,6 +17,8 @@ export type CacheRouteOptions = {
   overrides?: RequestOverrides | ((req: Request) => RequestOverrides);
   /* Modify response for test */
   modify?: (route: Route, response: APIResponse) => Promise<unknown>;
+  /* Modify JSON response (helper) */
+  modifyJson?: (json: any) => any;
   /* Disable caching, always request from server */
   noCache?: boolean;
   /* Disable caching, always request from server and update cached files */

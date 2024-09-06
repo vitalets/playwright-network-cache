@@ -59,7 +59,7 @@
           loader.style.display = 'block'; // Show loader
           const response = await fetch('api/cats');
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`error: ${response.status}`);
           }
           const cats = await response.json();
           catList.innerHTML = ''; // Clear existing cat list

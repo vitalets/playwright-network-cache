@@ -104,8 +104,16 @@ export class CacheRouteHandler {
   }
 
   private async fulfillRoute(response: APIResponse) {
-    const modify = this.options.modify || (() => this.route.fulfill({ response }));
-    await modify(this.route, response);
+    const { modify, modifyJson } = this.options;
+    if (modify) {
+      await modify(this.route, response);
+    } else if (modifyJson) {
+      const origJson = await response.json();
+      const resJson = await modifyJson(origJson);
+      await this.route.fulfill({ json: resJson || origJson });
+    } else {
+      await this.route.fulfill({ response });
+    }
   }
 
   private buildCacheDir() {
