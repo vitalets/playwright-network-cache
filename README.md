@@ -288,18 +288,23 @@ Cache structure will be:
                 └── body.json
 ```
 
-### Multi-step cache in complex scenarios
-For complex scenarios, you may want to have different caches for the same API call.
+## Options
+All actual options are described in code.
+
+## Multi-step cache in complex scenarios
+For complex scenarios, you may want to have different cache files for the same API call.
 *Example:*
 Imagine you have a page with a list of 3 cats and buttons to add and remove cats.
 You want to test whole end-2-end flow with adding and removing cats.
-You can manage it with a single cache file for `/api/cats` and different `modify` options:
+
+#### Approach 1: single cache file
+You can manage it with a single cache file for `/api/cats` and several `modify` options:
 ```ts
 test('test cats', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats'); // <- returns 3 cats
 
-  // load page
-  // assert there are 3 cats on the page
+  // ...load page
+  // ...assert there are 3 cats on the page
 
   await cacheRoute.GET('/api/cats', {
     modify: async (route, response) => {
@@ -309,8 +314,8 @@ test('test cats', async ({ page, cacheRoute }) => {
     }
   });
 
-  // click add cat button
-  // assert there are 4 cats on the page
+  // ...click add cat button
+  // ...assert there are 4 cats on the page
 
   await cacheRoute.GET('/api/cats', {
     modify: async (route, response) => {
@@ -321,49 +326,33 @@ test('test cats', async ({ page, cacheRoute }) => {
     }
   });
 
-  // click remove cat button
-  // assert there are 3 new cats on the page
+  // ...click remove cat button
+  // ...assert there are 3 new cats on the page
 });
 ```
-But it is *less end-2-end* behavior, because test repeats actions performed by server.
-Another approach is to use `extraDir` option for setting *checkpoints* between test steps.
-Then cache files for the same API call will be separated in different directories:
+
+#### Approach 2: checkpoints
+Alternative approach is to use `extraDir` option for setting *checkpoints* between test steps. Then cache files will be stored in different directories:
 ```ts
 test('test cats', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats'); // <- returns 3 cats
 
-  // load page
-  // assert there are 3 cats on the page
+  // ...load page
+  // ...assert there are 3 cats on the page
 
-  cacheRoute.options.extraDir.push('after-add')
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json.push('Cat-4'); // <- emulate 4th cat is added to initial list
-      await route.fulfill({ json });
-    }
-  });
+  // store server response in a new sub dir
+  cacheRoute.options.extraDir.push('after-add');
+  
+  // ...click add cat button
+  // ...assert there are 4 cats on the page
 
-  // click add cat button
-  // assert there are 4 cats on the page
+  cacheRoute.options.extraDir.pop();
+  cacheRoute.options.extraDir.push('after-remove');
 
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json.shift();       // <- emulate 1st cat is removed
-      json.push('Cat-4'); // <- emulate 4th cat is added
-      await route.fulfill({ json });
-    }
-  });
-
-  // click remove cat button
-  // assert there are 3 new cats on the page
+  // ...click remove cat button
+  // ...assert there are 3 new cats on the page
 });
 ```
-
-
-## Options
-All actual options are described in code.
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
