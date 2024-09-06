@@ -104,12 +104,12 @@ export class CacheRouteHandler {
   }
 
   private async fulfillRoute(response: APIResponse) {
-    const { modify, modifyJson } = this.options;
+    const { modify, modifyJSON } = this.options;
     if (modify) {
       await modify(this.route, response);
-    } else if (modifyJson) {
+    } else if (modifyJSON) {
       const origJson = await response.json();
-      const resJson = await modifyJson(origJson);
+      const resJson = await modifyJSON(origJson);
       await this.route.fulfill({ json: resJson || origJson });
     } else {
       await this.route.fulfill({ response });

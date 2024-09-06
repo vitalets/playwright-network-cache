@@ -18,7 +18,7 @@ export type CacheRouteOptions = {
   /* Modify response for test */
   modify?: (route: Route, response: APIResponse) => Promise<unknown>;
   /* Modify JSON response (helper) */
-  modifyJson?: (json: any) => any;
+  modifyJSON?: (json: any) => any;
   /* Disable caching, always request from server */
   noCache?: boolean;
   /* Disable caching, always request from server and update cached files */

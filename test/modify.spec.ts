@@ -17,9 +17,9 @@ test('modify response', async ({ page, cacheRoute }) => {
   await expect(page.getByRole('list')).toContainText('Kitty');
 });
 
-test('modifyJson', async ({ page, cacheRoute }) => {
+test('modifyJSON', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
-    modifyJson: (json) => {
+    modifyJSON: (json) => {
       json[0].name = 'Kitty';
     },
   });
