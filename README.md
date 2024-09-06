@@ -358,6 +358,21 @@ test('test cats', async ({ page, cacheRoute }) => {
   // ...assert there are 3 new cats on the page
 });
 ```
+Generated cache structure:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── POST
+            ├── headers.json
+            ├── body.json          # <- response with 3 cats
+            ├── after-add
+            │   ├── headers.json
+            │   └── body.json      # <- response with 4 cats
+            └── after-remove
+                ├── headers.json
+                └── body.json      # <- response with new 3 cats 
+```
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
