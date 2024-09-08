@@ -6,8 +6,6 @@
 
 Speed up your [Playwright](https://playwright.dev/) tests by cache and mock network requests.
 
-**!This project is under development!**
-
 <!-- toc -->
 
 - [Features](#features)
@@ -23,9 +21,10 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
   * [Additional match by HTTP status](#additional-match-by-http-status)
   * [Additional match by request fields](#additional-match-by-request-fields)
   * [Separation of cache files](#separation-of-cache-files)
+  * [Change base dir](#change-base-dir)
   * [Split cache files by request query / body](#split-cache-files-by-request-query--body)
+  * [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [API](#api)
-- [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
@@ -346,6 +345,59 @@ the generated structure is:
 ```
 </details>
 
+### Change base dir
+
+<details>
+  <summary>Click to expand</summary>
+
+By default, cache files are stored in `.network-cache` base directory. You can use `baseDir` option to change it:
+
+```ts
+// fixtures.ts
+import { test as base } from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
+
+export const test = base.extend<{ cacheRoute: CacheRoute }>({
+  cacheRoute: async ({ page }, use, testInfo) => {
+    await use(new CacheRoute(page, {
+      baseDir: `test/.network-cache`
+    }));
+  }
+});
+```
+Moreover, you can set separate `baseDir` for each Playwright **project**:
+```ts
+// fixtures.ts
+import { test as base } from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
+
+export const test = base.extend<{ cacheRoute: CacheRoute }>({
+  cacheRoute: async ({ page }, use, testInfo) => {
+    await use(new CacheRoute(page, {
+      baseDir: `test/.network-cache/${testInfo.project.name}`
+    }));
+  }
+});
+```
+Example of generated structure
+```
+.network-cache
+├── project-one
+│   └── example.com
+│       └── api-cats
+│           └── GET
+│               ├── headers.json
+│               └── body.json
+└── project-two
+    └── example.com
+        └── api-cats
+            └── GET
+                ├── headers.json
+                └── body.json
+
+```
+</details>
+
 ### Split cache files by request query / body
 
 <details>
@@ -414,10 +466,11 @@ Cache structure will be:
 
 </details>
 
-## API
-All actual options are described in code.
+### Multi-step cache in complex scenarios
 
-## Multi-step cache in complex scenarios
+<details>
+  <summary>Click to expand</summary>
+
 For complex scenarios, you may want to have different cache for the same API call during the test. Example: testing scenario of adding a new todo item into the todo list.
 
 With caching in mind, the plan for such test can be the following:
@@ -467,6 +520,11 @@ Generated cache structure:
 
 > You may still need to modify cached responses to match test expectation. But it will be mainly *replacement* modifications, not adding items into the response body. 
 Such approach fits more end-2-end nature of Playwright tests.
+
+</details>
+
+## API
+All actual options are described in code.
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
