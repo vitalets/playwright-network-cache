@@ -108,3 +108,18 @@ test('split by request params', async ({ page, cacheRoute, json }) => {
   expect(json(`localhost/api-cats/GET/foo=1/headers.json`)).toHaveProperty('status', 200);
   expect(json(`localhost/api-cats/GET/foo=2/headers.json`)).toHaveProperty('status', 200);
 });
+
+test('additional match', async ({ page, cacheRoute, exists }) => {
+  await cacheRoute.GET('/api/cats*', {
+    match: (req) => new URL(req.url()).searchParams.get('foo') === 'bar',
+    extraDir: 'with-foo',
+  });
+
+  await openHomePage(page);
+
+  expect(exists('localhost/api-cats/GET/with-foo/headers.json')).toBe(false);
+
+  await page.evaluate(() => fetch('/api/cats?foo=bar'));
+
+  expect(exists('localhost/api-cats/GET/with-foo/headers.json')).toBe(true);
+});

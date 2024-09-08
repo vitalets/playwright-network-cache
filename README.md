@@ -14,23 +14,22 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 - [Cache structure](#cache-structure)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Examples](#examples)
   * [Cache request for a single test](#cache-request-for-a-single-test)
-  * [Cache request across all tests](#cache-request-across-all-tests)
-  * [Store isolated cache for a particular test](#store-isolated-cache-for-a-particular-test)
-  * [Store isolated cache for each test](#store-isolated-cache-for-each-test)
+  * [Cache request for all tests](#cache-request-for-all-tests)
   * [Modify cached response](#modify-cached-response)
   * [Disable cache](#disable-cache)
   * [Force cache update](#force-cache-update)
-  * [Split cache files by request query params](#split-cache-files-by-request-query-params)
-  * [Split cache files by request body](#split-cache-files-by-request-body)
-- [Options](#options)
+  * [Match by request fields](#match-by-request-fields)
+  * [Match by response HTTP status](#match-by-response-http-status)
+  * [Separation of cache files](#separation-of-cache-files)
+  * [Split cache files by request query / body](#split-cache-files-by-request-query--body)
 - [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
-    + [Approach 1: single cache file](#approach-1-single-cache-file)
-    + [Approach 2: checkpoints](#approach-2-checkpoints)
+- [API](#api)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
-    + [0.2.0](#020)
+  * [0.2.0](#020)
 - [Feedback](#feedback)
 - [License](#license)
 
@@ -39,10 +38,11 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 ## Features
 
 * Cache network requests automatically during test run
-* Store responses as a straightforward file structure
+* Store responses in a straightforward file structure
 * Modify cached responses for test
 * Reuse cache between test runs
 * Inspect response body as a pretty formatted JSON
+* No manual mocks maintenance
 * No mess with HAR format, see [motivation](#motivation)
 
 ## Cache structure
@@ -63,7 +63,7 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-1. Define `cacheRoute` fixture using [`test.extend()`](https://playwright.dev/docs/test-fixtures#creating-a-fixture) method:
+1. Extend `test` instance with  `cacheRoute` fixture:
     ```ts
     // fixtures.ts
     import { test as base } from '@playwright/test';
@@ -84,9 +84,14 @@ npm i -D playwright-network-cache
     });
     ```
 
-More examples below.
+See more examples below.
+
+## Examples
 
 ### Cache request for a single test
+<details>
+  <summary>Click to expand</summary>
+
 Cache GET requests to `/api/cats` in a particular test:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -95,10 +100,19 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-All subsequent test runs will re-use cached response. 
-To invalidate that cache, delete files or provide special options.
+All subsequent test runs will also re-use cached response. To invalidate that cache, delete files or provide `forceUpdate` option.
 
-### Cache request across all tests
+If you need to match with unknown query params, use glob pattern:
+```ts
+await cacheRoute.GET('/api/cats*');
+```
+</details>
+
+### Cache request for all tests
+
+<details>
+  <summary>Click to expand</summary>
+
 Define `cacheRoute` as an **auto** fixture:
 ```ts
 // fixtures.ts
@@ -114,14 +128,151 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 });
 ```
 Now GET requests to `/api/cats` in all tests will share the same cache.
+</details>
 
-### Store isolated cache for a particular test
-You may want to have a separate cache for particular test.
-For that you can utilize `cacheRoute.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during test.
+### Modify cached response
+
+<details>
+  <summary>Click to expand</summary>
+
+Set `modify` option. Inside this function, you can get the json / text from the response, modify it and call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with modified data:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats', {
+    modify: async (route, response) => {
+      const json = await response.json();
+      json[0].name = 'Kitty-1';
+      await route.fulfill({ json });
+    }
+  });
+  // ...
+});
+```
+</details>
+
+### Disable cache
+
+<details>
+  <summary>Click to expand</summary>
+
+To disable cache in a **single test**, set `cacheRoute.options.noCache` to `true`:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  cacheRoute.options.noCache = true;
+  await cacheRoute.GET('/api/cats'); // <- will not cache
+  // ...
+});
+```
+
+To disable cache in **all tests**, set `noCache` option to `true` in the fixture:
+```ts
+// fixtures.ts
+import { test as base } from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
+
+export const test = base.extend<{ cacheRoute: CacheRoute }>({
+  cacheRoute: async ({ page }, use, testInfo) => {
+    await use(new CacheRoute(page, {
+      noCache: true
+    }));
+  }
+});
+```
+
+> **Note:** When cache is disabled, response is still transformed by `modify` functions
+
+</details>
+
+### Force cache update
+
+<details>
+  <summary>Click to expand</summary>
+
+To force updating cache files for a **single test**, set `cacheRoute.options.forceUpdate` to `true`:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  cacheRoute.options.forceUpdate = true;
+  await cacheRoute.GET('/api/cats');
+  // ...
+});
+```
+
+To force updating cache files for **all tests**, set `forceUpdate` option to `true` in the fixture:
+```ts
+// fixtures.ts
+import { test as base } from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
+
+export const test = base.extend<{ cacheRoute: CacheRoute }>({
+  cacheRoute: async ({ page }, use, testInfo) => {
+    await use(new CacheRoute(page, {
+      forceUpdate: true
+    }));
+  }
+});
+```
+</details>
+
+### Match by request fields
+
+<details>
+  <summary>Click to expand</summary>
+
+By default, only URL pattern defines which requests will be matched and cached.
+If you need more customized control, use `match` option. 
+Example of matching GET requests only to `/api/cats?foo=bar`:
 
 ```ts
 test('test', async ({ page, cacheRoute }) => {
-  cacheRoute.extraDir.push('custom-test');
+  await cacheRoute.GET('/api/cats*', { 
+    match: req => new URL(req.url()).searchParams.get('foo') === 'bar'
+  });
+  // ...
+});
+```
+
+> Notice `*` in `/api/cats*` to match query params
+
+</details>
+
+### Match by response HTTP status
+
+<details>
+  <summary>Click to expand</summary>
+
+By default, only responses with `2xx` status are considered valid and stored to cache.
+If you need to test error responses, provide additional `httpStatus` option to cache route:
+
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats', { 
+    httpStatus: 500 
+  });
+  // ...
+});
+```
+Now error response is cached in the following structure:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── GET
+            └── 500
+                ├── headers.json
+                └── body.json
+```
+</details>
+
+### Separation of cache files
+
+<details>
+  <summary>Click to expand</summary>
+
+You may want to have a separate cache for a particular test. For that you can utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during test.
+
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  cacheRoute.options.extraDir.push('custom-test');
   await cacheRoute.GET('/api/cats');
   // ...
 });
@@ -137,7 +288,6 @@ Generated cache structure:
                 └── body.json
 ```
 
-### Store isolated cache for each test
 To store cache files in a separate directory for **each test**, 
 you can set `extraDir` to `testInfo.title` in a fixture setup:
 ```ts
@@ -167,85 +317,25 @@ the generated structure is:
                 ├── headers.json
                 └── body.json           
 ```
+</details>
 
-### Modify cached response
-Use `modify` option. It accepts `route` and `response` params, 
-so you can get json / text from the response, 
-modify it and call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with modified data:
+### Split cache files by request query / body
+
+<details>
+  <summary>Click to expand</summary>
+
+To split cache by request query params, you can set `extraDir` option in cache route:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json[0].name = 'Kitty-1';
-      await route.fulfill({ json });
-    }
-  });
-  // ...
-});
-```
-
-### Disable cache
-To disable cache in a **single test**, set `cacheRoute.options.noCache` to `true`:
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  cacheRoute.options.noCache = true;
-  await cacheRoute.GET('/api/cats'); // <- will not cache
-  // ...
-});
-```
-
-To disable cache in **all tests**, set `noCache` option to `true` in the fixture:
-```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
-export const test = base.extend<{ cacheRoute: CacheRoute }>({
-  cacheRoute: async ({ page }, use, testInfo) => {
-    await use(new CacheRoute(page, {
-      noCache: true
-    }));
-  }
-});
-```
-
-> **Note:** When cache is disabled, response is still transformed by `modify` functions
-
-### Force cache update
-To force updating cache files for a **single test**, set `cacheRoute.options.forceUpdate` to `true`:
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  cacheRoute.options.forceUpdate = true;
-  await cacheRoute.GET('/api/cats');
-  // ...
-});
-```
-
-To force updating cache files for **all tests**, set `forceUpdate` option to `true` in the fixture:
-```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
-export const test = base.extend<{ cacheRoute: CacheRoute }>({
-  cacheRoute: async ({ page }, use, testInfo) => {
-    await use(new CacheRoute(page, {
-      forceUpdate: true
-    }));
-  }
-});
-```
-
-### Split cache files by request query params
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats', {
+  await cacheRoute.GET('/api/cats*', {
     extraDir: req => new URL(req.url()).searchParams.toString()
   });
   // ...
 });
 ```
+
+> Notice `*` in `/api/cats*` to match query params
+
 Given the following requests:
 ```
 GET /api/cats?foo=1
@@ -265,7 +355,9 @@ Cache structure will be:
                 └── body.json
 ```
 
-### Split cache files by request body
+> **Note:** `extraDir` from request route with be appended to `cacheRoute.options.extraDir`.
+
+Splitting cache files by request body:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
@@ -293,86 +385,58 @@ Cache structure will be:
                 └── body.json
 ```
 
-## Options
-All actual options are described in code.
+</details>
 
 ## Multi-step cache in complex scenarios
-For complex scenarios, you may want to have different cache files for the same API call.
-*Example:*
-Imagine you have a page with a list of 3 cats and buttons to add and remove cats.
-You want to test whole end-2-end flow with adding and removing cats.
+For complex scenarios, you may want to have different cache for the same API call during the test. Example: testing scenario of adding a new todo item into the todo list.
 
-#### Approach 1: single cache file
-You can manage it with a single cache file for `/api/cats` and several `modify` options:
+With caching in mind, the plan for such test can be the following:
+
+1. Set cache for GET request to return original todo items
+2. Load the page
+3. Set cache for POST request to create new todo item
+4. Set cache for GET request to return updated todo items
+5. Enter todo text and click "Add" button
+6. Assert that todo list is updated
+
+The implementation utilizes `extraDir` option to dynamically change cache path in the test checkpoints. 
+
 ```ts
-test('test cats', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats'); // <- returns 3 cats
+test('adding todo', async ({ page, cacheRoute }) => {
+  // setup cache for getting todo items
+  await cacheRoute.GET('/api/todo');
 
   // ...load page
-  // ...assert there are 3 cats on the page
 
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json.push('Cat-4'); // <- emulate 4th cat is added to initial list
-      await route.fulfill({ json });
-    }
-  });
-
-  // ...click add cat button
-  // ...assert there are 4 cats on the page
-
-  await cacheRoute.GET('/api/cats', {
-    modify: async (route, response) => {
-      const json = await response.json();
-      json.shift();       // <- emulate 1st cat is removed
-      json.push('Cat-4'); // <- emulate 4th cat is added
-      await route.fulfill({ json });
-    }
-  });
-
-  // ...click remove cat button
-  // ...assert there are 3 new cats on the page
-});
-```
-
-#### Approach 2: checkpoints
-Alternative approach is to use `extraDir` option for setting *checkpoints* between test steps. Then cache files will be stored in different directories:
-```ts
-test('test cats', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats'); // <- returns 3 cats
-
-  // ...load page
-  // ...assert there are 3 cats on the page
-
-  // store server response in a new sub dir
+  // CHECKPOINT: store all below caches in a new directory
   cacheRoute.options.extraDir.push('after-add');
+  // setup cache for creating a todo item
+  await cacheRoute.POST('/api/todo');
   
-  // ...click add cat button
-  // ...assert there are 4 cats on the page
-
-  cacheRoute.options.extraDir.pop();
-  cacheRoute.options.extraDir.push('after-remove');
-
-  // ...click remove cat button
-  // ...assert there are 3 new cats on the page
+  // ...add todo item
+  // ...reload page
+  // ...assert todo list is updated
 });
 ```
 Generated cache structure:
 ```
 .network-cache
 └── example.com
-    └── api-cats
+    └── api-todo
+        ├── GET
+        │   ├── headers.json
+        │   ├── body.json          # <- original response
+        │   └── after-add
+        │       ├── headers.json
+        │       └── body.json      # <- updated response
         └── POST
-            ├── headers.json
-            ├── body.json          # <- response with 3 cats
-            ├── after-add
-            │   ├── headers.json
-            │   └── body.json      # <- response with 4 cats
-            └── after-remove
+            └── after-add
                 ├── headers.json
-                └── body.json      # <- response with new 3 cats 
+                └── body.json
 ```
+
+## API
+All actual options are described in code.
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
@@ -392,7 +456,7 @@ Alternatively, you can check the following packages:
 
 ## Changelog
 
-#### 0.2.0
+### 0.2.0
 * new api released (breaking)
 
 ## Feedback
