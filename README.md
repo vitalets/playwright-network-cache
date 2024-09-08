@@ -6,10 +6,31 @@
 
 Speed up your [Playwright](https://playwright.dev/) tests by cache and mock network requests.
 
+## Features
+
+* Cache network requests automatically during test run
+* Store responses in a straightforward file structure
+* Modify cached responses in runtime
+* Reuse cache between test runs
+* Inspect response bodies as a pretty formatted JSON
+* No manual mocks maintenance
+* No mess with HAR format, see [motivation](#motivation)
+
+## Cache structure
+Example of the generated cache structure for a single request:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── GET
+            ├── headers.json
+            └── body.json
+```
+
+## Content
+
 <!-- toc -->
 
-- [Features](#features)
-- [Cache structure](#cache-structure)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Examples](#examples)
@@ -33,27 +54,6 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 - [License](#license)
 
 <!-- tocstop -->
-
-## Features
-
-* Cache network requests automatically during test run
-* Store responses in a straightforward file structure
-* Modify cached responses in runtime
-* Reuse cache between test runs
-* Inspect response bodies as a pretty formatted JSON
-* No manual mocks maintenance
-* No mess with HAR format, see [motivation](#motivation)
-
-## Cache structure
-Example of auto-generated cache structure:
-```
-.network-cache
-└── example.com
-    └── api-cats
-        └── GET
-            ├── headers.json
-            └── body.json
-```
 
 ## Installation
 Install from npm:
@@ -79,8 +79,8 @@ npm i -D playwright-network-cache
     ```ts
     // test.ts
     test('test', async ({ page, cacheRoute }) => {
-      await cacheRoute.GET('/api/cats');
-      // ... all GET requests to /api/cats will be cached
+      await cacheRoute.GET('https://example.com/api/cats');
+      // ... all GET requests to https://example.com/api/cats will be cached
     });
     ```
 
@@ -92,27 +92,31 @@ See more examples below.
 <details>
   <summary>Click to expand</summary>
 
-Cache GET requests to `/api/cats` in a particular test:
+To cache specific route call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats');
   // ...
 });
 ```
+All subsequent test runs will also re-use cached response. To invalidate that cache, delete files or provide special options (see below).
 
-All subsequent test runs will also re-use cached response. To invalidate that cache, delete files or provide `forceUpdate` option.
-
-If you need to match with unknown query params, use glob pattern:
+You can use glob-star `*` and full hostname in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
 ```ts
-await cacheRoute.GET('/api/cats*');
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('https://example.com/**/api/cats*');
+  // ...
+});
 ```
 
-You can use other HTTP methods:
+Other HTTP methods:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.POST('/api/cats');
   await cacheRoute.PUT('/api/cats');
   await cacheRoute.DELETE('/api/cats');
+  await cacheRoute.PATCH('/api/cats');
+  await cacheRoute.ALL('/api/cats');
   // ...
 });
 ```
@@ -167,6 +171,18 @@ test('test', async ({ page, cacheRoute }) => {
   // ...
 });
 ```
+For modifying JSON responses, there is a helper option `modifyJSON`:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats', {
+    modifyJSON: (json) => {
+      json[0].name = 'Kitty';
+    },
+  });
+  // ...
+});
+```
+`modifyJSON` can modify json in-place (like above) or return some result, that will overwrite the original data.
 </details>
 
 ### Disable cache
