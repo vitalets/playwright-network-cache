@@ -484,12 +484,12 @@ Generated cache structure:
     └── api-todo
         ├── GET
         │   ├── headers.json
-        │   ├── body.json          # <- original response
-        │   └── after-add
+        │   ├── body.json
+        │   └── after-add          # <- extra directory
         │       ├── headers.json
-        │       └── body.json      # <- updated response
+        │       └── body.json
         └── POST
-            └── after-add
+            └── after-add          # <- extra directory
                 ├── headers.json
                 └── body.json
 ```
