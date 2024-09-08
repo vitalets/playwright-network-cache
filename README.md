@@ -494,8 +494,7 @@ Generated cache structure:
                 └── body.json
 ```
 
-> You may still need to modify cached responses to match test expectation. But it will be mainly *replacement* modifications, not adding items into the response body. 
-Such approach fits more end-2-end nature of Playwright tests.
+> You may still modify cached responses to match test expectation. But it will be mainly *replacement* modifications, not changing structure of the response body. Such approach fits more end-2-end nature of Playwright tests.
 
 </details>
 
