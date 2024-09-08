@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { test as base, expect, Page } from '@playwright/test';
-import { CacheRoute } from '../src';
+import { CacheRoute, filenamify } from '../src';
 
 type Fixtures = {
   cacheRoute: CacheRoute;
@@ -14,7 +14,7 @@ export const test = base.extend<Fixtures>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(
       new CacheRoute(page, {
-        baseDir: `test/.network-cache/${testInfo.title}`,
+        baseDir: `test/.network-cache/${filenamify(testInfo.title)}`,
       }),
     );
   },
