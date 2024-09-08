@@ -138,10 +138,6 @@ Generated cache structure:
 
 Define `cacheRoute` as an **auto** fixture:
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: [async ({ page }, use) => {
     const cacheRoute = new CacheRoute(page);
@@ -158,7 +154,7 @@ Now GET requests to `/api/cats` in all tests will share the same cache.
 <details>
   <summary>Click to expand</summary>
 
-Set `modify` option. Inside this function, you can get the json / text from the response, modify it and call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with modified data:
+Set `modify` option to a custom function. Inside that function, you get the json / text from the response, modify it and call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with modified data:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
@@ -189,10 +185,6 @@ test('test', async ({ page, cacheRoute }) => {
 
 To disable cache in **all tests**, set `noCache` option to `true` in the fixture:
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
@@ -202,7 +194,7 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 });
 ```
 
-> **Note:** When cache is disabled, response is still transformed by `modify` functions
+> **Note:** When cache is disabled, `modify` functions still run
 
 </details>
 
@@ -222,10 +214,6 @@ test('test', async ({ page, cacheRoute }) => {
 
 To force updating cache files for **all tests**, set `forceUpdate` option to `true` in the fixture:
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
@@ -317,10 +305,6 @@ Generated cache structure:
 To store cache files in a separate directory for **each test**, 
 you can set `extraDir` option in a fixture setup:
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
@@ -353,10 +337,6 @@ the generated structure is:
 By default, cache files are stored in `.network-cache` base directory. You can use `baseDir` option to change it:
 
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
@@ -367,10 +347,6 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 ```
 Moreover, you can set separate `baseDir` for each Playwright **project**:
 ```ts
-// fixtures.ts
-import { test as base } from '@playwright/test';
-import { CacheRoute } from 'playwright-network-cache';
-
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
