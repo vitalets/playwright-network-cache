@@ -85,7 +85,7 @@ export const test = base.extend<Fixtures>({
 ```
 
 #### 2. Use `cacheRoute` inside test
-For example, to cache GET request to `example.com/api/cats`:
+For example, to cache GET request to `https://example.com/api/cats`:
 ```ts
 // test.ts
 test('test', async ({ page, cacheRoute }) => {
@@ -120,7 +120,7 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-See more examples below.
+See more examples below or check [API](#api).
 
 ## Examples
 
@@ -536,7 +536,7 @@ These methods enable caching for specific HTTP routes:
 - **optionsOrFn**: Caching options or a function to modify the response
 
 ### Options
-You can provide options to `CacheRoute` constructor or modify them dynamically via `cacheRoute.options`.
+You can provide options to `CacheRoute` constructor or modify them dynamically via `cacheRoute.options`. All values are optional.
 
 #### baseDir
 `string`
@@ -566,7 +566,7 @@ Time to live for cached responses, in minutes.
 #### overrides
 `RequestOverrides | ((req: Request) => RequestOverrides)`
 
-Object or function that provides request overrides (e.g., headers, body) when making real calls.
+Object or function that provides request [overrides](https://playwright.dev/docs/api/class-route#route-fetch) (e.g., headers, body) when making real calls.
 
 #### modify
 `(route: Route, response: APIResponse) => Promise<unknown>`
