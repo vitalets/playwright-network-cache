@@ -5,6 +5,7 @@ const baseURL = 'http://localhost:3000';
 export default defineConfig({
   testDir: 'test',
   fullyParallel: true,
+  globalSetup: './test/global-setup.ts',
   use: {
     baseURL,
     viewport: { width: 800, height: 600 },
