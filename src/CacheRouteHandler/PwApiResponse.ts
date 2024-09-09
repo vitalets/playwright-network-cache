@@ -5,11 +5,22 @@
  */
 import path from 'node:path';
 
-const pwCoreRoot = resolvePackageRoot('playwright-core');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pwClientModule = require(`${pwCoreRoot}/lib/client/api`);
+// can't make it lazy, because it's used in the class extends
+export const PwApiResponse = getPlaywrightClientApi().APIResponse;
 
-export const PwApiResponse = pwClientModule.APIResponse;
+function getPlaywrightClientApi() {
+  const pwCoreRoot = getPlaywrightCoreRoot();
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require(`${pwCoreRoot}/lib/client/api`);
+}
+
+function getPlaywrightCoreRoot() {
+  const pwCoreRoot = resolvePackageRoot('playwright-core');
+  if (!pwCoreRoot) {
+    throw new Error('Cannot find playwright-core package. Please install @playwright/test');
+  }
+  return pwCoreRoot;
+}
 
 function resolvePackageRoot(packageName: string) {
   const packageJsonPath = require.resolve(`${packageName}/package.json`);
