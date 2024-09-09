@@ -16,8 +16,7 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 * No manual mocks maintenance
 * No mess with HAR format, see [motivation](#motivation)
 
-## Cache structure
-Example of the generated cache structure for a single request:
+Example of cache structure:
 ```
 .network-cache
 └── example.com
@@ -46,6 +45,9 @@ Example of the generated cache structure for a single request:
   * [Split cache files by request query / body](#split-cache-files-by-request-query--body)
   * [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [API](#api)
+  * [Constructor](#constructor)
+  * [Methods](#methods)
+  * [Options](#options)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
@@ -92,14 +94,30 @@ See more examples below.
 <details>
   <summary>Click to expand</summary>
 
-To cache specific route call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test:
+To cache specific route call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test.
+For example, to cache GET request to `/api/cats`:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats');
   // ...
 });
 ```
-All subsequent test runs will also re-use cached response. To invalidate that cache, delete files or provide special options (see below).
+
+This test will store response on the filesystem:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── GET
+            ├── headers.json
+            └── body.json
+```
+All subsequent test runs will re-use cached response. To invalidate that cache, delete files or provide special options (see below).
+
+Default template for cache path: 
+```
+{baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
+```
 
 You can use glob-star `*` and full hostname in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
 ```ts
@@ -107,31 +125,6 @@ test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('https://example.com/**/api/cats*');
   // ...
 });
-```
-
-Other HTTP methods:
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.POST('/api/cats');
-  await cacheRoute.PUT('/api/cats');
-  await cacheRoute.DELETE('/api/cats');
-  await cacheRoute.PATCH('/api/cats');
-  await cacheRoute.ALL('/api/cats');
-  // ...
-});
-```
-
-Generated cache structure:
-```
-.network-cache
-└── example.com
-    └── api-cats
-        ├── GET
-        │   ├── headers.json
-        │   └── body.json
-        └── POST
-            ├── headers.json
-            └── body.json
 ```
 </details>
 
@@ -515,7 +508,88 @@ Generated cache structure:
 </details>
 
 ## API
-All actual options are described in code.
+The `CacheRoute` class manages caching of routes for a Playwright `Page` or `BrowserContext`. It simplifies setting up HTTP method handlers for specific routes with caching options.
+
+### Constructor
+
+```ts
+const cacheRoute = new CacheRoute(page, options?)
+```
+
+- **page**: The Playwright `Page` or `BrowserContext` to manage routes.
+- **options**: Optional configuration to control caching behavior.
+
+### Methods
+
+These methods enable caching for specific HTTP routes:
+
+- `cacheRoute.GET(url, optionsOrFn?)`
+- `cacheRoute.POST(url, optionsOrFn?)`
+- `cacheRoute.PUT(url, optionsOrFn?)`
+- `cacheRoute.PATCH(url, optionsOrFn?)`
+- `cacheRoute.DELETE(url, optionsOrFn?)`
+- `cacheRoute.HEAD(url, optionsOrFn?)`
+- `cacheRoute.ALL(url, optionsOrFn?)`
+
+The optional `optionsOrFn` argument can be used to pass caching options or a function to modify the response.
+
+### Options
+
+#### baseDir
+`string`
+
+Base directory for cache files.
+
+#### extraDir
+`string | string[] | ((req: Request) => string | string[])`
+
+Additional directory for cache files. Can be a string, array of strings, or a function that accepts a request and returns a string or an array of strings.
+
+#### match
+`(req: Request) => boolean`
+
+Function to add additional matching logic for requests. Returns `true` to cache, or `false` to skip.
+
+#### httpStatus
+`number`
+
+Cache responses with the specified HTTP status code.
+
+#### ttlMinutes
+`number`
+
+Time to live for cached responses, in minutes.
+
+#### overrides
+`RequestOverrides | ((req: Request) => RequestOverrides)`
+
+Object or function that provides request overrides (e.g., headers, body) when making real calls.
+
+#### modify
+`(route: Route, response: APIResponse) => Promise<unknown>`
+
+Function to modify the response before caching. This is called for each route.
+
+#### modifyJSON
+`(json: any) => any`
+
+Helper function to modify JSON responses before caching.
+
+#### noCache
+`boolean`
+
+If `true`, disables caching and always makes requests to the server.
+
+#### forceUpdate
+`boolean`
+
+If `true`, always requests from the server and updates the cached files.
+
+#### buildCacheDir
+`(ctx: BuildCacheDirArg) => string[]`
+
+Function to build a custom cache directory, providing fine-grained control over the cache file location.
+[Default implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/CacheRoute/defaults.ts).
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 

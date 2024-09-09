@@ -26,7 +26,7 @@
     "test:d": "npm test -- --debug",
     "example": "npx playwright test -c example",
     "example:serve": "npx ts-node ./example/src/server",
-    "toc": "markdown-toc -i README.md",
+    "toc": "markdown-toc -i README.md --maxdepth 3",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
