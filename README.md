@@ -33,7 +33,6 @@ Example of cache structure:
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
 - [Examples](#examples)
-  * [Cache request for a single test](#cache-request-for-a-single-test)
   * [Cache request for all tests](#cache-request-for-all-tests)
   * [Modify cached response](#modify-cached-response)
   * [Disable cache](#disable-cache)
