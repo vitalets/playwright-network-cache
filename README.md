@@ -8,13 +8,13 @@ Speed up [Playwright](https://playwright.dev/) tests by caching network requests
 
 ## Features
 
-* Cache network requests automatically during test run
-* Store responses on filesystem in a straightforward structure
-* Modify cached responses in runtime
-* Reuse cache between test runs
-* Inspect response bodies as a pretty formatted JSON
-* No manual mock maintenance
-* No mess with HAR format, see [motivation](#motivation)
+- Automatically cache network requests during test execution  
+- Save responses to the filesystem in a clear, organized structure  
+- Modify cached responses dynamically during runtime  
+- Reuse cached data across multiple test runs  
+- View response bodies in a pretty formatted JSON  
+- Eliminate the need for manual mock management  
+- Avoid the complexity of the HAR format — see [motivation](#motivation)  
 
 Example of cache structure:
 ```
@@ -85,7 +85,7 @@ export const test = base.extend<Fixtures>({
 ```
 
 #### 2. Use `cacheRoute` inside test
-For example, to cache GET request to `https://example.com/api/cats`:
+For example, to cache a GET request to `https://example.com/api/cats`:
 ```ts
 // test.ts
 test('test', async ({ page, cacheRoute }) => {
@@ -94,7 +94,7 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-On the first run this test will store response on the filesystem:
+On the first run this test will store the response on the filesystem:
 ```
 .network-cache
 └── example.com
@@ -172,7 +172,7 @@ test('test', async ({ page, cacheRoute }) => {
   // ...
 });
 ```
-`modifyJSON` can modify response json in-place (like above) or return some result, that will overwrite the original data.
+`modifyJSON` can modify response json in-place (like above) or return some result, which will overwrite the original data.
 </details>
 
 ### Disable cache
@@ -184,12 +184,12 @@ To disable cache in a **single test**, set `cacheRoute.options.noCache` to `true
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   cacheRoute.options.noCache = true;
-  await cacheRoute.GET('/api/cats'); // <- will not cache
+  await cacheRoute.GET('/api/cats'); // <- this will not cache the request
   // ...
 });
 ```
 
-To disable cache in **all tests**, set `noCache` option to `true` in the fixture:
+To disable cache in **all tests**, set the `noCache` option to `true` in the fixture:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
@@ -218,7 +218,7 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-To force updating cache files for **all tests**, set `forceUpdate` option to `true` in the fixture:
+To force updating cache files for **all tests**, set the `forceUpdate` option to `true` in the fixture:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
