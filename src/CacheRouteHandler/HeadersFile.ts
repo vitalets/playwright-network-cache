@@ -19,8 +19,8 @@ export class HeadersFile {
     this.path = path.join(dir, 'headers.json');
   }
 
-  stat() {
-    return fs.existsSync(this.path) ? fs.statSync(this.path) : null;
+  getLastModified() {
+    return this.stat()?.mtimeMs || 0;
   }
 
   async read() {
@@ -28,12 +28,16 @@ export class HeadersFile {
     return JSON.parse(content) as ResponseInfo;
   }
 
-  async save(responseInfo: ResponseInfo) {
-    await this.ensureDir();
-    await fs.promises.writeFile(this.path, prettifyJson(responseInfo));
+  save(responseInfo: ResponseInfo) {
+    this.ensureDir();
+    fs.writeFileSync(this.path, prettifyJson(responseInfo));
   }
 
-  private async ensureDir() {
-    await fs.promises.mkdir(path.dirname(this.path), { recursive: true });
+  private ensureDir() {
+    fs.mkdirSync(path.dirname(this.path), { recursive: true });
+  }
+
+  private stat() {
+    return fs.existsSync(this.path) ? fs.statSync(this.path) : null;
   }
 }

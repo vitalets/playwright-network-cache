@@ -4,6 +4,7 @@ const baseURL = 'http://localhost:4000';
 
 export default defineConfig({
   testDir: 'test',
+  fullyParallel: true,
   use: {
     baseURL,
   },

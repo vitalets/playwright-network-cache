@@ -13,6 +13,7 @@ import { HttpMethod, ResolvedCacheRouteOptions } from '../CacheRoute';
 export class CacheRouteHandler {
   private req: Request;
   private cacheDir: string = '';
+  private lastModified = 0;
 
   constructor(
     private httpMethod: HttpMethod,
@@ -28,11 +29,21 @@ export class CacheRouteHandler {
       return;
     }
 
-    this.buildCacheDir();
+    const { noCache, forceUpdate } = this.options;
 
-    const response = this.isCacheHit()
-      ? await this.fetchFromCache() // prettier-ignore
-      : await this.fetchFromServer();
+    if (noCache) {
+      const response = await this.fetchFromServer();
+      await this.fulfillRoute(response);
+      return;
+    }
+
+    this.buildCacheDir();
+    this.storeLastModified();
+
+    const response =
+      forceUpdate || this.isExpired()
+        ? await this.fetchFromServer() // prettier-ignore
+        : await this.fetchFromCache();
 
     await this.fulfillRoute(response);
   }
@@ -50,17 +61,12 @@ export class CacheRouteHandler {
     return matchFn(this.req);
   }
 
-  private isCacheHit() {
-    const { noCache, forceUpdate } = this.options;
-    return !noCache && !forceUpdate && !this.isExpired();
-  }
-
   private async fetchFromServer() {
     const overrides = toFunction(this.options.overrides)(this.req);
     const response = await this.route.fetch(overrides);
 
-    if (this.shouldSaveResponse(response)) {
-      await this.saveResponse(response);
+    if (this.matchHttpStatus(response)) {
+      await this.trySaveResponse(response);
     }
 
     return response;
@@ -74,33 +80,29 @@ export class CacheRouteHandler {
   }
 
   private isExpired() {
-    const headersFileStat = new HeadersFile(this.cacheDir).stat();
-    if (this.options.ttlMinutes === undefined) return !headersFileStat;
-    const lastModified = headersFileStat?.mtimeMs || 0;
-    const age = Date.now() - lastModified;
+    if (this.options.ttlMinutes === undefined) return !this.lastModified;
+    const age = Date.now() - this.lastModified;
     return age > this.options.ttlMinutes * 60 * 1000;
   }
 
-  private shouldSaveResponse(response: APIResponse) {
-    if (this.options.noCache) return false;
-    if (this.options.forceUpdate) return true;
-    // additionally check this.isExpired(),
-    // b/c file can be already created by another worker
-    // todo: warn if status is not matched?
-    return this.matchHttpStatus(response) && this.isExpired();
+  private isUpdated() {
+    const lastModified = new HeadersFile(this.cacheDir).getLastModified();
+    return lastModified > this.lastModified;
   }
 
-  private async saveResponse(response: APIResponse) {
+  private async trySaveResponse(response: APIResponse) {
     const responseInfo: ResponseInfo = {
       url: response.url(),
       status: response.status(),
       statusText: response.statusText(),
       headers: response.headers(),
     };
-    await Promise.all([
-      this.saveHeadersFile(responseInfo),
-      this.saveBodyFile(responseInfo, response),
-    ]);
+    const body = await response.body();
+    // file can be updated by another worker
+    if (!this.isUpdated()) {
+      new HeadersFile(this.cacheDir).save(responseInfo);
+      new BodyFile(this.cacheDir, responseInfo).save(body);
+    }
   }
 
   private async fulfillRoute(response: APIResponse) {
@@ -147,12 +149,7 @@ export class CacheRouteHandler {
     return httpStatus ? response.status() === httpStatus : response.ok();
   }
 
-  private async saveHeadersFile(responseInfo: ResponseInfo) {
-    await new HeadersFile(this.cacheDir).save(responseInfo);
-  }
-
-  private async saveBodyFile(responseInfo: ResponseInfo, response: APIResponse) {
-    const bodyFile = new BodyFile(this.cacheDir, responseInfo);
-    await bodyFile.save(await response.body());
+  private storeLastModified() {
+    this.lastModified = new HeadersFile(this.cacheDir).getLastModified();
   }
 }
