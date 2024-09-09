@@ -48,6 +48,7 @@ Example of cache structure:
   * [Constructor](#constructor)
   * [Methods](#methods)
   * [Options](#options)
+- [Debug](#debug)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
@@ -591,6 +592,12 @@ If `true`, always requests from the server and updates the cached files.
 
 Function to build a custom cache directory, providing fine-grained control over the cache file location.
 [Default implementation](https://github.com/vitalets/playwright-network-cache/blob/main/src/CacheRoute/defaults.ts).
+
+## Debug
+To debug caching, run Playwright with the following `DEBUG` environment variable:
+```bash
+DEBUG=playwright-network-cache npx playwright test
+```
 
 ## Motivation
 Playwright has built-in [support for HAR format](https://playwright.dev/docs/mock#mocking-with-har-files) to record and replay network requests. 
