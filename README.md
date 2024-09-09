@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/playwright-network-cache)](https://www.npmjs.com/package/playwright-network-cache)
 [![license](https://img.shields.io/npm/l/playwright-network-cache)](https://github.com/vitalets/playwright-network-cache/blob/main/LICENSE)
 
-Speed up your [Playwright](https://playwright.dev/) tests by cache and mock network requests.
+Speed up [Playwright](https://playwright.dev/) tests by caching network requests on the filesystem.
 
 ## Features
 
