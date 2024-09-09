@@ -30,6 +30,10 @@
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
+  "dependencies": {
+    "debug": "4.3.7",
+    "mime-types": "2.1.35"
+  },
   "devDependencies": {
     "@eslint/js": "9.10.0",
     "@playwright/test": "1.44.1",
@@ -61,9 +65,5 @@
     "e2e"
   ],
   "funding": "https://github.com/sponsors/vitalets",
-  "license": "MIT",
-  "dependencies": {
-    "debug": "4.3.7",
-    "mime-types": "2.1.35"
-  }
+  "license": "MIT"
 }
