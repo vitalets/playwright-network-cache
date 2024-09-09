@@ -26,12 +26,12 @@ Example of cache structure:
             └── body.json
 ```
 
-## Content
+## Index
 
 <!-- toc -->
 
 - [Installation](#installation)
-- [Usage](#usage)
+- [Basic usage](#basic-usage)
 - [Examples](#examples)
   * [Cache request for a single test](#cache-request-for-a-single-test)
   * [Cache request for all tests](#cache-request-for-all-tests)
@@ -64,7 +64,7 @@ Install from npm:
 npm i -D playwright-network-cache
 ```
 
-## Usage
+## Basic usage
 1. Extend Playwright's `test` instance with  `cacheRoute` fixture:
     ```ts
     // fixtures.ts
@@ -95,7 +95,7 @@ See more examples below.
 <details>
   <summary>Click to expand</summary>
 
-To cache specific route call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test.
+To cache specific request, call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test.
 For example, to cache GET request to `/api/cats`:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -120,7 +120,7 @@ Default template for cache path:
 {baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
 ```
 
-To catch requests to third-party APIs, use full hostname and glob-star `*` in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
+To catch requests to third-party APIs, you can use full hostname and glob-star `*` in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('https://example.com/**/api/cats*');
@@ -153,7 +153,7 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 <details>
   <summary>Click to expand</summary>
 
-You can modify the cached response for a specific test by setting the `modify` option to a custom function. In this function, you'll receive the response data as JSON or text, make your changes, and then call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with the updated data.
+You can modify the cached response by setting the `modify` option to a custom function. In this function, you retrieve the response data, make your changes, and then call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with the updated data.
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
@@ -177,7 +177,7 @@ test('test', async ({ page, cacheRoute }) => {
   // ...
 });
 ```
-`modifyJSON` can modify json in-place (like above) or return some result, that will overwrite the original data.
+`modifyJSON` can modify response json in-place (like above) or return some result, that will overwrite the original data.
 </details>
 
 ### Disable cache
@@ -273,7 +273,7 @@ By default, requests are matched by:
 HTTP method + URL pattern + (optionally) HTTP status 
 ```
 If you need to match by other request fields, provide custom function to `match` option. 
-Example of matching GET requests only to `/api/cats?foo=bar`:
+Example of matching GET requests with query param `/api/cats?foo=bar`:
 
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -293,7 +293,7 @@ test('test', async ({ page, cacheRoute }) => {
 <details>
   <summary>Click to expand</summary>
 
-You may want to store cache files separately for a particular test. For that you can utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during the test.
+You may want to store cache files separately for a particular test. For that, you can utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during the test.
 
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -313,18 +313,18 @@ Generated cache structure:
                 └── body.json
 ```
 
-To store cache files in a separate directory for **each test**, 
+To store cache files in a separate directory for **all tests**, 
 you can set `extraDir` option in a fixture setup:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
     await use(new CacheRoute(page, {
-      extraDir: testInfo.title  // <- use testInfo.title as an extraDir
+      extraDir: testInfo.title  // <- use testInfo.title as a unique extraDir
     }));
   }
 });
 ```
-After running two tests with titles `custom-test-1` `and custom-test-2`,
+After running two tests with titles `custom test 1` and `custom test 2`,
 the generated structure is:
 ```
 .network-cache
@@ -345,7 +345,7 @@ the generated structure is:
 <details>
   <summary>Click to expand</summary>
 
-By default, cache files are stored in `.network-cache` base directory. You can use `baseDir` option to change it:
+By default, cache files are stored in `.network-cache` base directory. To change this location, use `baseDir` option:
 
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
@@ -356,7 +356,7 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
   }
 });
 ```
-Moreover, you can set separate `baseDir` for each Playwright **project**:
+Moreover, you can set separate `baseDir` for each Playwright project or each test:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: async ({ page }, use, testInfo) => {
@@ -383,6 +383,9 @@ Example of generated structure
                 └── body.json
 
 ```
+
+> In that example, you get more isolation, but less cache re-use. It's a trade-off, as always 🤷‍♂️
+
 </details>
 
 ### Split cache files by request query / body
@@ -473,14 +476,14 @@ The implementation utilizes `extraDir` option to dynamically change cache path i
 
 ```ts
 test('adding todo', async ({ page, cacheRoute }) => {
-  // setup cache for getting todo items
+  // set cache for GET request to load todo items
   await cacheRoute.GET('/api/todo');
 
   // ...load page
 
-  // CHECKPOINT: all subsequent caches will be stored in a new directory
+  // CHECKPOINT: change cache dir, all subsequent requests will be stored separately
   cacheRoute.options.extraDir.push('after-add');
-  // setup cache for creating a todo item
+  // set cache for POST request to create a todo item
   await cacheRoute.POST('/api/todo');
   
   // ...add todo item
@@ -496,11 +499,11 @@ Generated cache structure:
         ├── GET
         │   ├── headers.json
         │   ├── body.json
-        │   └── after-add          # <- extra directory
+        │   └── after-add
         │       ├── headers.json
         │       └── body.json
         └── POST
-            └── after-add          # <- extra directory
+            └── after-add
                 ├── headers.json
                 └── body.json
 ```
@@ -536,6 +539,7 @@ These methods enable caching for specific HTTP routes:
 The optional `optionsOrFn` argument can be used to pass caching options or a function to modify the response.
 
 ### Options
+You can provide options to `CacheRoute` constructor or modify them dynamically via `cacheRoute.options`.
 
 #### baseDir
 `string`
