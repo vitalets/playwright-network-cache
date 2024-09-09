@@ -65,42 +65,33 @@ npm i -D playwright-network-cache
 ```
 
 ## Basic usage
-1. Extend Playwright's `test` instance with  `cacheRoute` fixture:
-    ```ts
-    // fixtures.ts
-    import { test as base } from '@playwright/test';
-    import { CacheRoute } from 'playwright-network-cache';
 
-    export const test = base.extend<{ cacheRoute: CacheRoute }>({
-      cacheRoute: async ({ page }, use) => {
-        await use(new CacheRoute(page, { /* cache options */ }));
-      }
-    });
-    ```
+#### 1. Setup `cacheRoute` fixture
 
-2. Use `cacheRoute` fixture in tests:
-    ```ts
-    // test.ts
-    test('test', async ({ page, cacheRoute }) => {
-      await cacheRoute.GET('https://example.com/api/cats*');
-      // ... all GET requests to https://example.com/api/cats will be cached
-    });
-    ```
-
-See more examples below.
-
-## Examples
-
-### Cache request for a single test
-<details>
-  <summary>Click to expand</summary>
-
-To cache specific request, call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` inside a test.
-For example, to cache GET request to `/api/cats`:
+Extend Playwright's `test` instance with  `cacheRoute` fixture:
 ```ts
+// fixtures.ts
+import { test as base } from '@playwright/test';
+import { CacheRoute } from 'playwright-network-cache';
+
+type Fixtures = {
+  cacheRoute: CacheRoute;
+};
+
+export const test = base.extend<Fixtures>({
+  cacheRoute: async ({ page }, use) => {
+    await use(new CacheRoute(page, { /* cache options */ }));
+  },
+});
+```
+
+#### 2. Use `cacheRoute` inside test
+For example, to cache GET request to `example.com/api/cats`:
+```ts
+// test.ts
 test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats');
-  // ...
+  await cacheRoute.GET('https://example.com/api/cats*');
+  // ... perform usual test actions
 });
 ```
 
@@ -113,21 +104,26 @@ On the first run this test will store response on the filesystem:
             ├── headers.json
             └── body.json
 ```
-All subsequent test runs will use cached response and execute much faster. To invalidate that cache, delete files or provide special [options](#options).
+All subsequent test runs will re-use cached response and execute much faster. To invalidate that cache, delete files or provide special [options](#options).
 
-Default template for cache path: 
+Default template for cache path is: 
 ```
 {baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
 ```
 
-To catch requests to third-party APIs, you can use full hostname and glob-star `*` in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
+You can call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` to cache routes with respective HTTP method.
+
+To catch requests to own APIs, you can omit hostname in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
 ```ts
 test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('https://example.com/**/api/cats*');
+  await cacheRoute.GET('/api/cats*');
   // ...
 });
 ```
-</details>
+
+See more examples below.
+
+## Examples
 
 ### Cache request for all tests
 
@@ -536,7 +532,9 @@ These methods enable caching for specific HTTP routes:
 - `cacheRoute.HEAD(url, optionsOrFn?)`
 - `cacheRoute.ALL(url, optionsOrFn?)`
 
-The optional `optionsOrFn` argument can be used to pass caching options or a function to modify the response.
+#### Params
+- **url**: [Url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url)
+- **optionsOrFn**: Caching options or a function to modify the response
 
 ### Options
 You can provide options to `CacheRoute` constructor or modify them dynamically via `cacheRoute.options`.
