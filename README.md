@@ -82,7 +82,7 @@ npm i -D playwright-network-cache
     ```ts
     // test.ts
     test('test', async ({ page, cacheRoute }) => {
-      await cacheRoute.GET('https://example.com/api/cats');
+      await cacheRoute.GET('https://example.com/api/cats*');
       // ... all GET requests to https://example.com/api/cats will be cached
     });
     ```
