@@ -64,7 +64,7 @@ npm i -D playwright-network-cache
 ```
 
 ## Usage
-1. Extend `test` instance with  `cacheRoute` fixture:
+1. Extend Playwright's `test` instance with  `cacheRoute` fixture:
     ```ts
     // fixtures.ts
     import { test as base } from '@playwright/test';
@@ -103,7 +103,7 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-This test will store response on the filesystem:
+On the first run this test will store response on the filesystem:
 ```
 .network-cache
 └── example.com
@@ -112,14 +112,14 @@ This test will store response on the filesystem:
             ├── headers.json
             └── body.json
 ```
-All subsequent test runs will re-use cached response. To invalidate that cache, delete files or provide special options (see below).
+All subsequent test runs will use cached response and execute much faster. To invalidate that cache, delete files or provide special [options](#options).
 
 Default template for cache path: 
 ```
 {baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
 ```
 
-You can use glob-star `*` and full hostname in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
+To catch requests to third-party APIs, use full hostname and glob-star `*` in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('https://example.com/**/api/cats*');
@@ -133,7 +133,9 @@ test('test', async ({ page, cacheRoute }) => {
 <details>
   <summary>Click to expand</summary>
 
-Define `cacheRoute` as an **auto** fixture:
+You can share cached response across all tests. 
+For that, define `cacheRoute` as an **auto** fixture and setup cached routes.
+For example, to share cached response of GET `/api/cats`:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: [async ({ page }, use) => {
@@ -143,7 +145,6 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
   }, { auto: true }]
 });
 ```
-Now GET requests to `/api/cats` in all tests will share the same cache.
 </details>
 
 ### Modify cached response
@@ -151,7 +152,7 @@ Now GET requests to `/api/cats` in all tests will share the same cache.
 <details>
   <summary>Click to expand</summary>
 
-Set `modify` option to a custom function. Inside that function, you get the json / text from the response, modify it and call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with modified data:
+You can modify the cached response for a specific test by setting the `modify` option to a custom function. In this function, you'll receive the response data as JSON or text, make your changes, and then call [`route.fulfill`](https://playwright.dev/docs/mock#modify-api-responses) with the updated data.
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
