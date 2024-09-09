@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "prepare": "git config core.hooksPath .hooks",
-    "lint": "eslint src",
+    "lint": "eslint .",
     "tsc": "tsc",
     "knip": "knip -c knip.config.ts",
     "prettier": "prettier --check --ignore-unknown .",
@@ -31,23 +31,23 @@
     "release": "bash scripts/release.sh"
   },
   "devDependencies": {
-    "@eslint/js": "9.5.0",
+    "@eslint/js": "9.10.0",
     "@playwright/test": "1.44.1",
     "@types/debug": "4.1.12",
     "@types/mime-types": "2.1.4",
     "@types/node": "^18.15.0",
-    "eslint": "8.57.0",
+    "eslint": "9.10.0",
     "eslint-plugin-playwright": "1.6.2",
-    "globals": "15.5.0",
-    "knip": "5.19.0",
-    "lint-staged": "15.2.7",
+    "globals": "15.9.0",
+    "knip": "5.30.0",
+    "lint-staged": "15.2.10",
     "markdown-toc": "1.2.0",
-    "np": "10.0.5",
-    "prettier": "3.3.2",
-    "publint": "0.2.8",
+    "np": "10.0.7",
+    "prettier": "3.3.3",
+    "publint": "0.2.10",
     "ts-node": "^10.9.2",
     "typescript": "5.4.5",
-    "typescript-eslint": "7.13.0"
+    "typescript-eslint": "8.4.0"
   },
   "repository": {
     "type": "git",
