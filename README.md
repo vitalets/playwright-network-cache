@@ -9,11 +9,11 @@ Speed up your [Playwright](https://playwright.dev/) tests by cache and mock netw
 ## Features
 
 * Cache network requests automatically during test run
-* Store responses in a straightforward file structure
+* Store responses on filesystem in a straightforward structure
 * Modify cached responses in runtime
 * Reuse cache between test runs
 * Inspect response bodies as a pretty formatted JSON
-* No manual mocks maintenance
+* No manual mock maintenance
 * No mess with HAR format, see [motivation](#motivation)
 
 Example of cache structure:
