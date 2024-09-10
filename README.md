@@ -13,8 +13,8 @@ Speed up [Playwright](https://playwright.dev/) tests by caching network requests
 - Modify cached responses dynamically during runtime  
 - Reuse cached data across multiple test runs  
 - View response bodies in a pretty formatted JSON  
-- Eliminate the need for manual mock management  
-- Avoid the complexity of the HAR format — see [motivation](#motivation)  
+- No need for manual mocks management  
+- No mess with the HAR format — see [motivation](#motivation)  
 
 Example of cache structure:
 ```
