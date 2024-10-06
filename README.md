@@ -6,7 +6,7 @@
 
 Speed up [Playwright](https://playwright.dev/) tests by caching network requests on the filesystem.
 
-#### Features
+#### ✨ Features
 
 - Automatically cache network requests during test execution  
 - Save responses to the filesystem in a clear, organized structure  
