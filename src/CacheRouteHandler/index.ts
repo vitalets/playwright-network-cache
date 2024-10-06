@@ -24,7 +24,7 @@ export class CacheRouteHandler {
     this.req = route.request();
   }
 
-  // eslint-disable-next-line complexity, max-statements
+  // eslint-disable-next-line visual/complexity, max-statements
   async handle() {
     if (!this.isRequestMatched()) {
       await this.route.fallback();
