@@ -9,11 +9,33 @@ on:
     - cron: 0 0 * * *
 
 jobs:
+  get-playwright-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        id: get-versions
+        with:
+          script: |
+            const minimalVersion = '1.35';
+            const { execSync } = require('node:child_process');
+            const info = execSync('npm show --json @playwright/test').toString();
+            const { versions } = JSON.parse(info);
+            return versions
+              .filter((v) => v.match(/\.0$/) && v >= minimalVersion)
+              .map((v) => v.replace(/\.0$/, ''))
+              .concat([ 'beta' ]);
+    outputs:
+      versions: ${{ steps.get-versions.outputs.result }}
+
   test:
+    needs: get-playwright-versions
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        playwrightVersion: ['1.35', 'latest', 'beta']
+        playwrightVersion: ${{ fromJson(needs.get-playwright-versions.outputs.versions) }}
+        os: ubuntu-latest
+        include:
+          - playwrightVersion: latest
+            os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
