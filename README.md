@@ -6,7 +6,7 @@
 
 Speed up [Playwright](https://playwright.dev/) tests by caching network requests on the filesystem.
 
-## Features
+#### Features
 
 - Automatically cache network requests during test execution  
 - Save responses to the filesystem in a clear, organized structure  
@@ -27,35 +27,32 @@ Example of cache structure:
 ```
 
 ## Index
-
-<!-- toc -->
-
+<!-- doc-gen TOC maxDepth="3" excludeText="Index" -->
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
 - [Examples](#examples)
-  * [Cache request for all tests](#cache-request-for-all-tests)
-  * [Modify cached response](#modify-cached-response)
-  * [Disable cache](#disable-cache)
-  * [Force cache update](#force-cache-update)
-  * [Additional match by HTTP status](#additional-match-by-http-status)
-  * [Additional match by request fields](#additional-match-by-request-fields)
-  * [Separation of cache files](#separation-of-cache-files)
-  * [Change base dir](#change-base-dir)
-  * [Split cache files by request query / body](#split-cache-files-by-request-query--body)
-  * [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
+  - [Cache request for all tests](#cache-request-for-all-tests)
+  - [Modify cached response](#modify-cached-response)
+  - [Disable cache](#disable-cache)
+  - [Force cache update](#force-cache-update)
+  - [Additional match by HTTP status](#additional-match-by-http-status)
+  - [Additional match by request fields](#additional-match-by-request-fields)
+  - [Separation of cache files](#separation-of-cache-files)
+  - [Change base dir](#change-base-dir)
+  - [Split cache files by request query / body](#split-cache-files-by-request-query--body)
+  - [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [API](#api)
-  * [Constructor](#constructor)
-  * [Methods](#methods)
-  * [Options](#options)
+  - [Constructor](#constructor)
+  - [Methods](#methods)
+  - [Options](#options)
 - [Debug](#debug)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
-  * [0.2.0](#020)
+  - [0.2.0](#020)
 - [Feedback](#feedback)
 - [License](#license)
-
-<!-- tocstop -->
+<!-- end-doc-gen -->
 
 ## Installation
 Install from npm:

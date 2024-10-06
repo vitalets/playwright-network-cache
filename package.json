@@ -26,7 +26,7 @@
     "test:d": "DEBUG=playwright-network-cache npm test",
     "example": "npx playwright test -c example",
     "example:serve": "npx ts-node ./example/src/server",
-    "toc": "markdown-toc -i README.md --maxdepth 3",
+    "toc": "md-magic --files README.md",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "bash scripts/release.sh"
   },
@@ -46,7 +46,7 @@
     "globals": "15.10.0",
     "knip": "5.31.0",
     "lint-staged": "15.2.10",
-    "markdown-toc": "1.2.0",
+    "markdown-magic": "3.3.0",
     "np": "10.0.7",
     "prettier": "3.3.3",
     "publint": "0.2.11",
