@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { openHomePage, test } from './fixtures';
+import { openHomePage, test } from '../fixtures';
 
 test('modify response', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {

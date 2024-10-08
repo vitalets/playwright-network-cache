@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { openHomePage, test } from './fixtures';
+import { openHomePage, test } from '../fixtures';
 
 test('noCache', async ({ page, cacheRoute, exists }) => {
   cacheRoute.options.noCache = true;

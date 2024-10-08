@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { expect } from '@playwright/test';
-import { openHomePage, test } from './fixtures';
+import { openHomePage, test } from '../fixtures';
 
 test('forceUpdate', async ({ page, cacheRoute, resolve }) => {
   await cacheRoute.GET('/api/cats');
