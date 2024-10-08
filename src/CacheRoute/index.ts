@@ -63,7 +63,13 @@ export class CacheRoute {
   ) {
     await this.page.route(url, async (route) => {
       const options = this.resolveMethodOptions(optionsOrFn);
-      await new CacheRouteHandler(httpMethod, route, options).handle();
+      try {
+        await new CacheRouteHandler(httpMethod, route, options).handle();
+      } catch (e) {
+        // ignore errors -> page can be already closed as route is not used in test
+        if (await this.isPageClosed()) return;
+        throw e;
+      }
     });
   }
 
@@ -82,5 +88,9 @@ export class CacheRoute {
     }
 
     return { ...this.options, ...methodOptions, extraDir };
+  }
+
+  protected async isPageClosed() {
+    return 'isClosed' in this.page ? this.page.isClosed() : !this.page?.pages().length;
   }
 }

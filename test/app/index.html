@@ -57,7 +57,9 @@
 
         try {
           loader.style.display = 'block'; // Show loader
-          const response = await fetch('api/cats');
+          const params = new URLSearchParams(window.location.search).toString();
+          const query = params ? `?${params}` : '';
+          const response = await fetch(`api/cats${query}`);
           if (!response.ok) {
             throw new Error(`error: ${response.status}`);
           }

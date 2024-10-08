@@ -2,6 +2,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
+import timers from 'timers/promises';
 
 const PORT = 3000;
 
@@ -20,6 +21,7 @@ const cats: Cat[] = [
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url?.includes('/api/cats')) {
+    if (req.url.includes('delay')) await timers.setTimeout(1000);
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.end(JSON.stringify(cats));
     return;

@@ -123,3 +123,10 @@ test('additional match', async ({ page, cacheRoute, exists }) => {
 
   expect(exists('localhost/api-cats/GET/with-foo/headers.json')).toBe(true);
 });
+
+test('page closed', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats*');
+
+  await page.goto('/?delay');
+  await page.close();
+});

@@ -615,6 +615,9 @@ Alternatively, you can check the following packages:
 
 ## Changelog
 
+### 0.2.1
+* handle requests after page is closed
+
 ### 0.2.0
 * new api released (breaking)
 
