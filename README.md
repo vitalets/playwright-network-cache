@@ -500,7 +500,7 @@ Generated cache structure:
                 └── body.json
 ```
 
-> You may still modify cached responses to match test expectation. But it will be mainly *replacement* modifications, not changing structure of the response body. Such approach fits more end-2-end nature of Playwright tests.
+> You may still modify cached responses to match test expectation. But it's better to make it as *replacement* modifications, not changing the structure of the response body. Keeping response structure is more "end-2-end" approach for Playwright tests.
 
 </details>
 
