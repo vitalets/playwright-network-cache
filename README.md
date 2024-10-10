@@ -8,13 +8,14 @@ Speed up [Playwright](https://playwright.dev/) tests by caching network requests
 
 #### ✨ Features
 
-- Automatically cache network requests during test execution  
-- Save responses to the filesystem in a clear, organized structure  
-- Modify cached responses dynamically during runtime  
-- Reuse cached data across multiple test runs  
-- View response bodies in a pretty formatted JSON  
-- No need for manual mocks management  
-- No mess with the HAR format — see [motivation](#motivation)  
+- Automatically cache network requests during test execution
+- Save responses to the filesystem in a clear, organized structure
+- Modify cached responses dynamically during runtime
+- Reuse cached data across multiple test runs
+- Configure TTL to automatically refresh the cache and keep responses up-to-date
+- View response bodies in a pretty formatted JSON
+- No need for manual mocks management
+- No mess with the HAR format — see [motivation](#motivation)
 
 Example of cache structure:
 ```
@@ -91,7 +92,7 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-On the first run this test will store the response on the filesystem:
+On the first run, the test will hit real API and store the response on the filesystem:
 ```
 .network-cache
 └── example.com
@@ -100,16 +101,11 @@ On the first run this test will store the response on the filesystem:
             ├── headers.json
             └── body.json
 ```
-All subsequent test runs will re-use cached response and execute much faster. To invalidate that cache, delete files or provide special [options](#options).
+All subsequent test runs will re-use cached response and execute much faster. You can invalidate that cache by manually deleting the files. Or provide `ttlMinutes` option to hit real API once in some period of time.
 
-Default template for cache path is: 
-```
-{baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
-```
+You can call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` to cache routes with respective HTTP method. [Url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url) can contain `*` or `**` to match url segments and query params.
 
-You can call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` to cache routes with respective HTTP method.
-
-To catch requests to own APIs, you can omit hostname in [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url):
+To catch requests targeting your own app APIs, you can omit hostname in url:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats*');
@@ -117,25 +113,27 @@ test('test', async ({ page, cacheRoute }) => {
 });
 ```
 
-See more examples below or check [API](#api).
+Default cache path is: 
+```
+{baseDir}/{hostname}/{pathname}/{httpMethod}/{extraDir}/{httpStatus}
+```
+
+See more examples below or check [configuration options](#options).
 
 ## Examples
 
-### Cache request for all tests
+### Invalidate cache once in a hour
 
 <details>
   <summary>Click to expand</summary>
 
-You can share cached response across all tests. 
-For that, define `cacheRoute` as an **auto** fixture and setup cached routes.
-For example, to share cached response of GET `/api/cats`:
+To keep response data up-to-date, you can automatically invalidate cache after configured time period. Set `ttlMinutes` option to desired value in minutes:
 ```ts
-export const test = base.extend<{ cacheRoute: CacheRoute }>({
-  cacheRoute: [async ({ page }, use) => {
-    const cacheRoute = new CacheRoute(page);
-    await cacheRoute.GET('/api/cats');
-    await use(cacheRoute);
-  }, { auto: true }]
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats', {
+    ttlMinutes: 60 // hit real API once in a hour
+  });
+  // ...
 });
 ```
 </details>
@@ -227,6 +225,24 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 ```
 </details>
 
+### Auto-cache request for all tests
+
+<details>
+  <summary>Click to expand</summary>
+
+You can setup caching of some request for all tests. To achieve that, define `cacheRoute` as **auto** fixture and setup cached routes.
+For example:
+```ts
+export const test = base.extend<{ cacheRoute: CacheRoute }>({
+  cacheRoute: [async ({ page }, use) => {
+    const cacheRoute = new CacheRoute(page);
+    await cacheRoute.GET('/api/cats');
+    await use(cacheRoute);
+  }, { auto: true }]
+});
+```
+</details>
+
 ### Additional match by HTTP status
 
 <details>
@@ -280,12 +296,13 @@ test('test', async ({ page, cacheRoute }) => {
 
 </details>
 
-### Separation of cache files
+### Isolate cache for particular test
 
 <details>
   <summary>Click to expand</summary>
 
-You may want to store cache files separately for a particular test. For that, you can utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during the test.
+By default, cache files are stored in a shared directory and re-used across tests.
+You may want to isolate cache files for a particular test. For that, utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during the test.
 
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -305,7 +322,7 @@ Generated cache structure:
                 └── body.json
 ```
 
-To store cache files in a separate directory for **all tests**, 
+To automatically store cache files in a separate directories for **each test**, 
 you can set `extraDir` option in a fixture setup:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
@@ -337,7 +354,7 @@ the generated structure is:
 <details>
   <summary>Click to expand</summary>
 
-By default, cache files are stored in `.network-cache` base directory. To change this location, use `baseDir` option:
+By default, cache files are stored in `.network-cache` base directory. To change this location, set `baseDir` option:
 
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
