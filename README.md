@@ -51,8 +51,6 @@ Example of cache structure:
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
 - [Changelog](#changelog)
-  - [0.2.1](#021)
-  - [0.2.0](#020)
 - [Feedback](#feedback)
 - [License](#license)
 <!-- end-doc-gen -->
@@ -634,10 +632,10 @@ Alternatively, you can check the following packages:
 
 ## Changelog
 
-### 0.2.1
+#### 0.2.1
 * handle requests after page is closed
 
-### 0.2.0
+#### 0.2.0
 * new api released (breaking)
 
 ## Feedback
