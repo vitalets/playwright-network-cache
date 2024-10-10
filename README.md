@@ -39,9 +39,9 @@ Example of cache structure:
   - [Auto-cache request for all tests](#auto-cache-request-for-all-tests)
   - [Additional match by HTTP status](#additional-match-by-http-status)
   - [Additional match by request fields](#additional-match-by-request-fields)
-  - [Isolate cache for particular test](#isolate-cache-for-particular-test)
-  - [Change base dir](#change-base-dir)
+  - [Split cache files by test](#split-cache-files-by-test)
   - [Split cache files by request query / body](#split-cache-files-by-request-query--body)
+  - [Change base dir](#change-base-dir)
   - [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [API](#api)
   - [Constructor](#constructor)
@@ -103,7 +103,7 @@ On the first run, the test will hit real API and store the response on the files
 ```
 All subsequent test runs will re-use cached response and execute much faster. You can invalidate that cache by manually deleting the files. Or provide `ttlMinutes` option to hit real API once in some period of time.
 
-You can call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` to cache routes with respective HTTP method. [Url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url) can contain `*` or `**` to match url segments and query params.
+You can call `cacheRoute.GET|POST|PUT|PATCH|DELETE|ALL` to cache routes with respective HTTP method. Url can contain `*` or `**` to match url segments and query params, see [url pattern](https://playwright.dev/docs/api/class-page#page-route-option-url).
 
 To catch requests targeting your own app APIs, you can omit hostname in url:
 ```ts
@@ -230,8 +230,7 @@ export const test = base.extend<{ cacheRoute: CacheRoute }>({
 <details>
   <summary>Click to expand</summary>
 
-You can setup caching of some request for all tests. To achieve that, define `cacheRoute` as **auto** fixture and setup cached routes.
-For example:
+You can setup caching of some request for all tests. Define `cacheRoute` as [auto fixture](https://playwright.dev/docs/test-fixtures#automatic-fixtures) and setup cached routes:
 ```ts
 export const test = base.extend<{ cacheRoute: CacheRoute }>({
   cacheRoute: [async ({ page }, use) => {
@@ -296,13 +295,13 @@ test('test', async ({ page, cacheRoute }) => {
 
 </details>
 
-### Isolate cache for particular test
+### Split cache files by test
 
 <details>
   <summary>Click to expand</summary>
 
-By default, cache files are stored in a shared directory and re-used across tests.
-You may want to isolate cache files for a particular test. For that, utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path. You can freely transform that array during the test.
+By default, cached responses are stored in a shared directory and re-used across tests.
+If you want to isolate cache files for a particular test, utilize `cacheRoute.options.extraDir` - an array of extra directories to be inserted into the cache path:
 
 ```ts
 test('test', async ({ page, cacheRoute }) => {
@@ -321,6 +320,7 @@ Generated cache structure:
                 ├── headers.json
                 └── body.json
 ```
+You can freely transform `extraDir` during the test and create nested directories if needed.
 
 To automatically store cache files in a separate directories for **each test**, 
 you can set `extraDir` option in a fixture setup:
@@ -347,6 +347,72 @@ the generated structure is:
                 ├── headers.json
                 └── body.json           
 ```
+</details>
+
+### Split cache files by request query / body
+
+<details>
+  <summary>Click to expand</summary>
+
+To split cache by request query params, you can set `extraDir` to a function. It accepts `request` as a first argument and gives access to any prop of the request:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats*', {
+    extraDir: req => new URL(req.url()).searchParams.toString()
+  });
+  // ...
+});
+```
+
+> Notice `*` in `/api/cats*` to match query params
+
+Given the following requests:
+```
+GET /api/cats?foo=1
+GET /api/cats?foo=2
+```
+Cache structure will be:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── GET
+            ├── foo=1
+            │   ├── headers.json
+            │   └── body.json
+            └── foo=2
+                ├── headers.json
+                └── body.json
+```
+
+Splitting cache files by request body:
+```ts
+test('test', async ({ page, cacheRoute }) => {
+  await cacheRoute.GET('/api/cats', {
+    extraDir: req => req.postDataJSON().email
+  });
+  // ...
+});
+```
+Having the following requests:
+```
+POST -d '{"email":"user1@example.com"}' /api/cats
+POST -d '{"email":"user2@example.com"}' /api/cats
+```
+Cache structure will be:
+```
+.network-cache
+└── example.com
+    └── api-cats
+        └── POST
+            ├── user1@example.com
+            │   ├── headers.json
+            │   └── body.json
+            └── user2@example.com
+                ├── headers.json
+                └── body.json
+```
+
 </details>
 
 ### Change base dir
@@ -397,87 +463,19 @@ Example of generated structure
 
 </details>
 
-### Split cache files by request query / body
-
-<details>
-  <summary>Click to expand</summary>
-
-To split cache by request query params, you can set `extraDir` option in cache route:
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats*', {
-    extraDir: req => new URL(req.url()).searchParams.toString()
-  });
-  // ...
-});
-```
-
-> Notice `*` in `/api/cats*` to match query params
-
-Given the following requests:
-```
-GET /api/cats?foo=1
-GET /api/cats?foo=2
-```
-Cache structure will be:
-```
-.network-cache
-└── example.com
-    └── api-cats
-        └── GET
-            ├── foo=1
-            │   ├── headers.json
-            │   └── body.json
-            └── foo=2
-                ├── headers.json
-                └── body.json
-```
-
-> **Note:** `extraDir` from request route with be appended to `cacheRoute.options.extraDir`.
-
-Splitting cache files by request body:
-```ts
-test('test', async ({ page, cacheRoute }) => {
-  await cacheRoute.GET('/api/cats', {
-    extraDir: req => req.postDataJSON().email
-  });
-  // ...
-});
-```
-Having the following requests:
-```
-POST -d '{"email":"user1@example.com"}' /api/cats
-POST -d '{"email":"user2@example.com"}' /api/cats
-```
-Cache structure will be:
-```
-.network-cache
-└── example.com
-    └── api-cats
-        └── POST
-            ├── user1@example.com
-            │   ├── headers.json
-            │   └── body.json
-            └── user2@example.com
-                ├── headers.json
-                └── body.json
-```
-
-</details>
-
 ### Multi-step cache in complex scenarios
 
 <details>
   <summary>Click to expand</summary>
 
-For complex scenarios, you may want to have different cache for the same API call during the test. Example: testing scenario of adding a new todo item into the todo list.
+For complex scenarios, you may want to have different cached responses for the same API. Example: adding a new todo item into the todo list.
 
 With caching in mind, the plan for such test can be the following:
 
-1. Set cache for GET request to return original todo items
-2. Load the page
+1. Set cache for GET request to load original todo items
+2. Open the todo items page
 3. Set cache for POST request to create new todo item
-4. Set cache for GET request to return updated todo items
+4. Set cache for GET request to load updated todo items
 5. Enter todo text and click "Add" button
 6. Assert todo list is updated
 
@@ -490,8 +488,9 @@ test('adding todo', async ({ page, cacheRoute }) => {
 
   // ...load page
 
-  // CHECKPOINT: change cache dir, all subsequent requests will be stored separately
+  // CHECKPOINT: change cache dir, all subsequent requests will be cached in `after-add` dir
   cacheRoute.options.extraDir.push('after-add');
+
   // set cache for POST request to create a todo item
   await cacheRoute.POST('/api/todo');
   
@@ -517,7 +516,7 @@ Generated cache structure:
                 └── body.json
 ```
 
-> You may still modify cached responses to match test expectation. But it's better to make it as *replacement* modifications, not changing the structure of the response body. Keeping response structure is more "end-2-end" approach for Playwright tests.
+> You may still modify cached responses to match test expectation. But it's better to make it as *replacement* modifications, not changing the structure of the response body. Keeping response structure unchanged is more "end-2-end" approach.
 
 </details>
 
