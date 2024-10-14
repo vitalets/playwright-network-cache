@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         playwrightVersion: ${{ fromJson(needs.get-playwright-versions.outputs.versions) }}
-        os: [ubuntu-latest]
+        os: [ubuntu-22.04]
         include:
           - playwrightVersion: latest
             os: windows-latest
