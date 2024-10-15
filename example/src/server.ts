@@ -4,6 +4,7 @@ import path from 'path';
 import timers from 'timers/promises';
 
 const PORT = 4000;
+const logger = console;
 
 export interface Cat {
   id: number;
@@ -19,6 +20,8 @@ const cats: Cat[] = [
 ];
 
 const server = http.createServer(async (req, res) => {
+  logger.log(req.method, req.url);
+
   if (req.method === 'GET' && req.url === '/') {
     const filePath = path.join(__dirname, 'index.html');
     const content = await fs.readFile(filePath);
@@ -38,7 +41,6 @@ const server = http.createServer(async (req, res) => {
   // add cat
   if (req.method === 'POST' && req.url?.startsWith('/api/cats')) {
     const name = new URLSearchParams(req.url.split('?')[1]).get('name');
-
     if (!name) {
       res.statusCode = 400;
       res.setHeader('Content-Type', 'application/json');
@@ -58,6 +60,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server running at http://localhost:${PORT}/`);
+  logger.log(`Server running at http://localhost:${PORT}/`);
 });

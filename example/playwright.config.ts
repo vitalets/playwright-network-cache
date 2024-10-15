@@ -7,6 +7,7 @@ export default defineConfig({
   fullyParallel: true,
   use: {
     baseURL,
+    screenshot: 'only-on-failure',
   },
   webServer: {
     command: 'npx ts-node ./src/server',

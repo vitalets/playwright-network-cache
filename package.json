@@ -25,6 +25,8 @@
     "test": "npx playwright test",
     "test:d": "DEBUG=playwright-network-cache npm test",
     "example": "npx playwright test -c example",
+    "example:debug": "DEBUG=playwright-network-cache npx playwright test -c example",
+    "example:nocache": "rm -rf .network-cache && npx playwright test -c example",
     "example:serve": "npx ts-node ./example/src/server",
     "toc": "md-magic --files README.md",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
