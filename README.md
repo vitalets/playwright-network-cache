@@ -39,8 +39,9 @@ Example of cache structure:
   - [Auto-cache request for all tests](#auto-cache-request-for-all-tests)
   - [Additional match by HTTP status](#additional-match-by-http-status)
   - [Additional match by request fields](#additional-match-by-request-fields)
-  - [Split cache files by test](#split-cache-files-by-test)
-  - [Split cache files by request query / body](#split-cache-files-by-request-query--body)
+  - [Split cache by test title](#split-cache-by-test-title)
+  - [Split cache by request URL params](#split-cache-by-request-url-params)
+  - [Split cache by request body](#split-cache-by-request-body)
   - [Change base dir](#change-base-dir)
   - [Multi-step cache in complex scenarios](#multi-step-cache-in-complex-scenarios)
 - [API](#api)
@@ -295,7 +296,7 @@ test('test', async ({ page, cacheRoute }) => {
 
 </details>
 
-### Split cache files by test
+### Split cache by test title
 
 <details>
   <summary>Click to expand</summary>
@@ -349,7 +350,7 @@ the generated structure is:
 ```
 </details>
 
-### Split cache files by request query / body
+### Split cache by request URL params
 
 <details>
   <summary>Click to expand</summary>
@@ -384,8 +385,14 @@ Cache structure will be:
                 ├── headers.json
                 └── body.json
 ```
+</details>
 
-Splitting cache files by request body:
+### Split cache by request body
+
+<details>
+  <summary>Click to expand</summary>
+
+To split cache by request body, you can set `extraDir` to a function. It accepts `request` as a first argument and gives access to any prop of the request:
 ```ts
 test('test', async ({ page, cacheRoute }) => {
   await cacheRoute.GET('/api/cats', {
@@ -412,7 +419,6 @@ Cache structure will be:
                 ├── headers.json
                 └── body.json
 ```
-
 </details>
 
 ### Change base dir
