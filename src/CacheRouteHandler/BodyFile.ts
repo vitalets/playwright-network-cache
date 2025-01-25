@@ -37,7 +37,7 @@ export class BodyFile {
 
   private getFilename() {
     const contentType = this.responseInfo.headers['content-type'];
-    const extension = mime.extension(contentType) || 'bin';
+    const extension = mime.extension(contentType || '') || 'bin';
     return `body.${extension}`;
   }
 }

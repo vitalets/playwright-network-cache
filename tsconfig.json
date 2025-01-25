@@ -3,6 +3,7 @@
     "target": "es2021",
     "module": "nodenext",
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
