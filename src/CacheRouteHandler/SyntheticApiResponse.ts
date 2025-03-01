@@ -13,7 +13,7 @@ export class SyntheticApiResponse extends PwApiResponse implements APIResponse {
     private info: ResponseInfo,
     private bodyBuffer: Buffer,
   ) {
-    super({}, { headers: [] });
+    super({ _platform: {} }, { headers: [] });
   }
 
   ok() {

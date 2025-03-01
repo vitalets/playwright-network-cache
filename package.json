@@ -24,6 +24,8 @@
     "prettier:w": "prettier --write --ignore-unknown .",
     "test": "npx playwright test",
     "test:d": "DEBUG=playwright-network-cache npm test",
+    "pw": "npm i --no-save @playwright/test@$PW",
+    "browsers": "npx cross-env PLAYWRIGHT_SKIP_BROWSER_GC=1 npx playwright install chromium",
     "example": "npx playwright test -c example",
     "example:debug": "DEBUG=playwright-network-cache npx playwright test -c example",
     "example:nocache": "rm -rf .network-cache && npx playwright test -c example",
