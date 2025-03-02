@@ -44,7 +44,7 @@
         "npm run lint",
         "npm run prettier",
         "npm ci",
-        "npx npm test",
+        "npm test",
         "npm run example",
         "npm run build"
       ]
