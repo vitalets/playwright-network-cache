@@ -16,7 +16,7 @@
     "README.md"
   ],
   "scripts": {
-    "prepare": "git config core.hooksPath .hooks",
+    "prepare": "git config core.hooksPath scripts/git-hooks",
     "lint": "eslint .",
     "tsc": "tsc",
     "knip": "knip -c knip.config.ts",
