@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import timers from 'timers/promises';
 
-const PORT = 4000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4321;
 const logger = console;
 
 export interface Cat {
