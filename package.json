@@ -32,7 +32,28 @@
     "example:serve": "npx ts-node ./example/src/server",
     "toc": "md-magic --files README.md",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "release": "bash scripts/release.sh"
+    "release": "release-it"
+  },
+  "release-it": {
+    "$schema": "https://unpkg.com/release-it/schema/release-it.json",
+    "git": {
+      "requireCleanWorkingDir": false
+    },
+    "hooks": {
+      "before:init": [
+        "npm run lint",
+        "npm run prettier",
+        "npm ci",
+        "npx npm test",
+        "npm run example",
+        "npm run build"
+      ]
+    },
+    "plugins": {
+      "@release-it/keep-a-changelog": {
+        "filename": "CHANGELOG.md"
+      }
+    }
   },
   "dependencies": {
     "debug": "^4.4.0",
@@ -41,6 +62,7 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@playwright/test": "1.50",
+    "@release-it/keep-a-changelog": "^6.0.0",
     "@types/debug": "4.1.12",
     "@types/mime-types": "2.1.4",
     "@types/node": "^18.15.0",
@@ -54,6 +76,7 @@
     "np": "^10.2.0",
     "prettier": "^3.5.2",
     "publint": "^0.3.7",
+    "release-it": "^18.1.2",
     "ts-node": "^10.9.2",
     "typescript": "5.4.5",
     "typescript-eslint": "^8.25.0"
