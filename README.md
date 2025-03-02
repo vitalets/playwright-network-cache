@@ -636,12 +636,7 @@ Alternatively, you can check the following packages:
 * [playwright-request-mocker](https://github.com/kousenlsn/playwright-request-mocker) uses HAR format, looks abandoned
 
 ## Changelog
-
-#### 0.2.1
-* handle requests after page is closed
-
-#### 0.2.0
-* new api released (breaking)
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Feedback
 Feel free to share your feedback and suggestions in [issues](https://github.com/vitalets/playwright-network-cache/issues).
