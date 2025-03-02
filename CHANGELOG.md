@@ -4,7 +4,6 @@
 
 ## [Unreleased]
 
-
 ## 0.2.1
 * Handle requests after page is closed
 

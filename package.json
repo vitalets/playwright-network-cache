@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
-    "@playwright/test": "1.44.1",
+    "@playwright/test": "1.50",
     "@types/debug": "4.1.12",
     "@types/mime-types": "2.1.4",
     "@types/node": "^18.15.0",
