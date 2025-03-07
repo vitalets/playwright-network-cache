@@ -34,29 +34,6 @@
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "release": "release-it"
   },
-  "release-it": {
-    "$schema": "https://unpkg.com/release-it/schema/release-it.json",
-    "git": {
-      "requireCleanWorkingDir": false
-    },
-    "hooks": {
-      "before:init": [
-        "npm run lint",
-        "npm run prettier",
-        "npm ci",
-        "npm test",
-        "npm run example",
-        "npm run build"
-      ]
-    },
-    "plugins": {
-      "@release-it/keep-a-changelog": {
-        "filename": "CHANGELOG.md",
-        "addUnreleased": true,
-        "addVersionUrl": true
-      }
-    }
-  },
   "dependencies": {
     "debug": "^4.4.0",
     "mime-types": "2.1.35"
@@ -75,7 +52,6 @@
     "knip": "^5.45.0",
     "lint-staged": "^15.4.3",
     "markdown-magic": "^3.4.0",
-    "np": "^10.2.0",
     "prettier": "^3.5.2",
     "publint": "^0.3.7",
     "release-it": "^18.1.2",
