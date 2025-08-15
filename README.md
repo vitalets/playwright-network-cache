@@ -28,9 +28,16 @@ Example of cache structure:
 ```
 
 ## Index
+
+<details>
+<summary>Click to expand</summary>
+
 <!-- doc-gen TOC maxDepth="3" excludeText="Index" -->
+    - [✨ Features](#features)
 - [Installation](#installation)
 - [Basic usage](#basic-usage)
+    - [1. Setup `cacheRoute` fixture](#1-setup-cacheroute-fixture)
+    - [2. Use `cacheRoute` inside a test](#2-use-cacheroute-inside-a-test)
 - [Examples](#examples)
   - [Invalidate cache once in a hour](#invalidate-cache-once-in-a-hour)
   - [Modify cached response](#modify-cached-response)
@@ -47,7 +54,19 @@ Example of cache structure:
 - [API](#api)
   - [Constructor](#constructor)
   - [Methods](#methods)
+    - [Params](#params)
   - [Options](#options)
+    - [baseDir](#basedir)
+    - [extraDir](#extradir)
+    - [match](#match)
+    - [httpStatus](#httpstatus)
+    - [ttlMinutes](#ttlminutes)
+    - [overrides](#overrides)
+    - [modify](#modify)
+    - [modifyJSON](#modifyjson)
+    - [noCache](#nocache)
+    - [forceUpdate](#forceupdate)
+    - [buildCacheDir](#buildcachedir)
 - [Debug](#debug)
 - [Motivation](#motivation)
 - [Alternatives](#alternatives)
@@ -55,6 +74,8 @@ Example of cache structure:
 - [Feedback](#feedback)
 - [License](#license)
 <!-- end-doc-gen -->
+
+</details>
 
 ## Installation
 Install from npm:
@@ -78,12 +99,14 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
   cacheRoute: async ({ page }, use) => {
-    await use(new CacheRoute(page, { /* cache options */ }));
+    const cacheRoute = new CacheRoute(page, { /* cache options */ });
+    await use(cacheRoute);
   },
 });
 ```
 
-#### 2. Use `cacheRoute` inside test
+#### 2. Use `cacheRoute` inside a test
+
 For example, to cache a GET request to `https://example.com/api/cats`:
 ```ts
 // test.ts
