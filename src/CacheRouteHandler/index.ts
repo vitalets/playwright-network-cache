@@ -103,8 +103,8 @@ export class CacheRouteHandler {
     // file can be updated by another worker
     if (!this.isUpdated()) {
       debug(`Writing cache: ${this.cacheDir}`);
+      await new BodyFile(this.cacheDir, responseInfo).save(body);
       new HeadersFile(this.cacheDir).save(responseInfo);
-      new BodyFile(this.cacheDir, responseInfo).save(body);
     } else {
       debug(`Skip writing cache, updated by another worker: ${this.cacheDir}`);
     }
