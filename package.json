@@ -37,28 +37,28 @@
   },
   "dependencies": {
     "debug": "^4.4.3",
-    "mime-types": "^3.0.1"
+    "mime-types": "^3.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
     "@playwright/test": "^1.55.1",
-    "@release-it/keep-a-changelog": "^7.0.0",
-    "@types/debug": "4.1.12",
+    "@release-it/keep-a-changelog": "^7.0.1",
+    "@types/debug": "4.1.13",
     "@types/mime-types": "^3.0.1",
     "@types/node": "^18.15.0",
     "eslint": "^9.37.0",
-    "eslint-plugin-playwright": "^2.2.2",
+    "eslint-plugin-playwright": "^2.10.2",
     "eslint-plugin-visual-complexity": "0.1.4",
-    "globals": "^16.4.0",
-    "knip": "^5.64.2",
+    "globals": "^17.6.0",
+    "knip": "^6.12.0",
     "lint-staged": "^16.2.3",
-    "markdown-magic": "^3.7.0",
-    "prettier": "^3.6.2",
-    "publint": "^0.3.14",
+    "markdown-magic": "^4.8.0",
+    "prettier": "^3.8.3",
+    "publint": "^0.3.19",
     "release-it": "^19.0.5",
     "ts-node": "^10.9.2",
     "typescript": "5.4.5",
-    "typescript-eslint": "^8.45.0"
+    "typescript-eslint": "^8.59.2"
   },
   "repository": {
     "type": "git",
