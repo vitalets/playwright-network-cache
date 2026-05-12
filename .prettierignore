@@ -1,3 +1,4 @@
 dist
 playwright-report
 **/*.md
+package-lock.json

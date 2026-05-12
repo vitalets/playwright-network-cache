@@ -3,6 +3,11 @@
   "description": "Cache network requests in Playwright tests",
   "version": "0.2.2",
   "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vitalets/playwright-network-cache.git"
+  },
+  "funding": "https://github.com/sponsors/vitalets",
   "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js"
@@ -60,9 +65,14 @@
     "typescript": "5.4.5",
     "typescript-eslint": "^8.59.2"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/vitalets/playwright-network-cache.git"
+  "prettier": {
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "printWidth": 100,
+    "semi": true,
+    "trailingComma": "all",
+    "bracketSpacing": true
   },
   "keywords": [
     "playwright",
@@ -71,6 +81,5 @@
     "testing",
     "e2e"
   ],
-  "funding": "https://github.com/sponsors/vitalets",
   "license": "MIT"
 }
