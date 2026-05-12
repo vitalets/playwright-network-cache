@@ -103,6 +103,9 @@ export class CacheRouteHandler {
     // file can be updated by another worker
     if (!this.isUpdated()) {
       debug(`Writing cache: ${this.cacheDir}`);
+      // Write headers last: readers treat headers.json as the "cache is ready" marker.
+      // See: https://github.com/vitalets/playwright-network-cache/pull/9
+      // TODO: If we ever need a strict single-writer guarantee (not just last-write-wins), use a lock file.
       await new BodyFile(this.cacheDir, responseInfo).save(body);
       new HeadersFile(this.cacheDir).save(responseInfo);
     } else {
