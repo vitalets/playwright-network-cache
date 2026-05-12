@@ -3,7 +3,8 @@
 > This project follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ## [Unreleased]
-* Support Playwright 1.60+.
+* fix: support Playwright 1.60+.
+* fix: await body write and write body before headers in saveResponse ([#9](https://github.com/vitalets/playwright-network-cache/pull/9)).
 
 ## [0.2.2] - 2025-03-02
 * Support Playwright 1.51
