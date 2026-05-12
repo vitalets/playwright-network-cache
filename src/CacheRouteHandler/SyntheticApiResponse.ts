@@ -1,20 +1,21 @@
 /**
- * Class representing cached response in Playwright's APIResponse interface.
+ * Minimal APIResponse-like object backed by cached files.
+ *
+ * Why this exists:
+ * - `modify` and `modifyJSON` callbacks expect an `APIResponse`-compatible object.
+ * - cached responses do not come from Playwright internals, so we cannot pass them to
+ *   `route.fulfill({ response })`.
+ * - instead we expose the APIResponse methods we use, and then fulfill via explicit
+ *   `{ status, headers, body }` in the route handler.
  */
 import { APIResponse } from '@playwright/test';
-import { PwApiResponse } from './PwApiResponse';
 import { ResponseInfo } from './HeadersFile';
 
-// Important to inherit from Playwright's APIResponse,
-// because route.fulfill() checks response via instance of:
-// https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/client/network.ts#L364
-export class SyntheticApiResponse extends PwApiResponse implements APIResponse {
+export class SyntheticApiResponse implements APIResponse {
   constructor(
     private info: ResponseInfo,
     private bodyBuffer: Buffer,
-  ) {
-    super({ _platform: {} }, { headers: [] });
-  }
+  ) {}
 
   ok() {
     return this.status() >= 200 && this.status() < 300;

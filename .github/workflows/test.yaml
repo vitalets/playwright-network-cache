@@ -17,6 +17,7 @@ jobs:
         id: get-versions
         with:
           script: |
+            if (context.eventName === 'schedule') return [ 'beta' ];
             const minimalVersion = '1.44';
             const { execSync } = require('node:child_process');
             const info = execSync('npm show --json @playwright/test').toString();

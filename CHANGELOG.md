@@ -3,6 +3,7 @@
 > This project follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ## [Unreleased]
+* Support Playwright 1.60+.
 
 ## [0.2.2] - 2025-03-02
 * Support Playwright 1.51

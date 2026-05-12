@@ -118,6 +118,14 @@ export class CacheRouteHandler {
       const origJson = await response.json();
       const resJson = await modifyJSON(origJson);
       await this.route.fulfill({ json: resJson || origJson });
+    } else if (response instanceof SyntheticApiResponse) {
+      // Playwright validates `fulfill({ response })` with an internal `instanceof APIResponse` check.
+      // For cached responses, fulfill via explicit fields to avoid relying on private constructors.
+      await this.route.fulfill({
+        status: response.status(),
+        headers: response.headers(),
+        body: await response.body(),
+      });
     } else {
       await this.route.fulfill({ response });
     }

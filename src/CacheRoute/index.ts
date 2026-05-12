@@ -91,6 +91,10 @@ export class CacheRoute {
   }
 
   protected async isPageClosed() {
-    return 'isClosed' in this.page ? this.page.isClosed() : !this.page?.pages().length;
+    return isBrowserContext(this.page) ? this.page.pages().length === 0 : this.page.isClosed();
   }
+}
+
+function isBrowserContext(page: Page | BrowserContext): page is BrowserContext {
+  return 'pages' in page;
 }
