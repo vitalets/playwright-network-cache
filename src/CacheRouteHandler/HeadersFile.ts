@@ -3,7 +3,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { prettifyJson, writeFileAtomic } from '../utils';
+import { prettifyJson } from '../utils';
 
 export type ResponseInfo = {
   url: string;
@@ -28,8 +28,17 @@ export class HeadersFile {
     return JSON.parse(content) as ResponseInfo;
   }
 
-  async save(responseInfo: ResponseInfo) {
-    await writeFileAtomic(this.path, prettifyJson(responseInfo));
+  save(responseInfo: ResponseInfo) {
+    this.ensureDir();
+    // Write to temp file + rename, so parallel workers never leave a half-overwritten file.
+    // See: https://github.com/vitalets/playwright-network-cache/issues/10
+    const tmpPath = `${this.path}.${process.pid}.tmp`;
+    fs.writeFileSync(tmpPath, prettifyJson(responseInfo));
+    fs.renameSync(tmpPath, this.path);
+  }
+
+  private ensureDir() {
+    fs.mkdirSync(path.dirname(this.path), { recursive: true });
   }
 
   private stat() {
