@@ -42,10 +42,14 @@ export class CacheRouteHandler {
     this.buildCacheDir();
     this.storeLastModified();
 
-    const useRealRequest = forceUpdate || this.isExpired();
-    const response = useRealRequest
-      ? await this.fetchFromServer() // prettier-ignore
-      : await this.fetchFromCache();
+    let useRealRequest = forceUpdate || this.isExpired();
+    let response: APIResponse | undefined = useRealRequest
+      ? undefined
+      : await this.tryFetchFromCache();
+    if (!response) {
+      useRealRequest = true;
+      response = await this.fetchFromServer();
+    }
 
     if (useRealRequest && this.matchHttpStatus(response)) {
       await this.saveResponse(response);
@@ -81,6 +85,18 @@ export class CacheRouteHandler {
     return new SyntheticApiResponse(responseInfo, body);
   }
 
+  /**
+   * Returns undefined if cache entry is broken (e.g. invalid JSON or missing body),
+   * so the response is re-fetched from server and the entry is overwritten.
+   */
+  private async tryFetchFromCache() {
+    try {
+      return await this.fetchFromCache();
+    } catch (e) {
+      debug(`Broken cache, re-fetching from server: ${this.cacheDir} (${e})`);
+    }
+  }
+
   private isExpired() {
     if (this.options.ttlMinutes === undefined) return !this.lastModified;
     const age = Date.now() - this.lastModified;
@@ -105,9 +121,12 @@ export class CacheRouteHandler {
       debug(`Writing cache: ${this.cacheDir}`);
       // Write headers last: readers treat headers.json as the "cache is ready" marker.
       // See: https://github.com/vitalets/playwright-network-cache/pull/9
+      // Both files are written atomically (temp file + rename), so concurrent writers resolve
+      // to last-write-wins without corrupting files.
+      // See: https://github.com/vitalets/playwright-network-cache/issues/10
       // TODO: If we ever need a strict single-writer guarantee (not just last-write-wins), use a lock file.
       await new BodyFile(this.cacheDir, responseInfo).save(body);
-      new HeadersFile(this.cacheDir).save(responseInfo);
+      await new HeadersFile(this.cacheDir).save(responseInfo);
     } else {
       debug(`Skip writing cache, updated by another worker: ${this.cacheDir}`);
     }

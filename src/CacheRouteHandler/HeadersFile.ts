@@ -3,7 +3,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { prettifyJson } from '../utils';
+import { prettifyJson, writeFileAtomic } from '../utils';
 
 export type ResponseInfo = {
   url: string;
@@ -28,13 +28,8 @@ export class HeadersFile {
     return JSON.parse(content) as ResponseInfo;
   }
 
-  save(responseInfo: ResponseInfo) {
-    this.ensureDir();
-    fs.writeFileSync(this.path, prettifyJson(responseInfo));
-  }
-
-  private ensureDir() {
-    fs.mkdirSync(path.dirname(this.path), { recursive: true });
+  async save(responseInfo: ResponseInfo) {
+    await writeFileAtomic(this.path, prettifyJson(responseInfo));
   }
 
   private stat() {

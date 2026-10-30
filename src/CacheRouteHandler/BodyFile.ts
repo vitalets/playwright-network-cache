@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import mime from 'mime-types';
-import { prettifyJson } from '../utils';
+import { prettifyJson, writeFileAtomic } from '../utils';
 import { ResponseInfo } from './HeadersFile';
 
 export class BodyFile {
@@ -27,12 +27,7 @@ export class BodyFile {
 
   async save(body: Buffer) {
     const content = this.isJson() ? prettifyJson(body.toString('utf8')) : body;
-    await this.ensureDir();
-    await fs.promises.writeFile(this.path, content);
-  }
-
-  private async ensureDir() {
-    await fs.promises.mkdir(path.dirname(this.path), { recursive: true });
+    await writeFileAtomic(this.path, content);
   }
 
   private getFilename() {

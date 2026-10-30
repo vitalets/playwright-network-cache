@@ -1,3 +1,7 @@
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+
 export function prettifyJson(data: string | Record<string, unknown>) {
   const obj = typeof data === 'string' ? JSON.parse(data) : data;
   return JSON.stringify(obj, null, 2);
@@ -36,4 +40,21 @@ export function toFunction<T, K>(value: T | ((...args: K[]) => T)) {
 
 export function trimSlash(s: string) {
   return s.replace(/^\/+|\/+$/, '');
+}
+
+/**
+ * Write file atomically: write to a unique temp file in the same dir, then rename it over the target.
+ * Readers never see a partially written file, and concurrent writers resolve to last-write-wins.
+ * See: https://github.com/vitalets/playwright-network-cache/issues/10
+ */
+export async function writeFileAtomic(filePath: string, content: string | Buffer) {
+  await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+  const tmpPath = `${filePath}.${process.pid}.${crypto.randomBytes(6).toString('hex')}.tmp`;
+  try {
+    await fs.promises.writeFile(tmpPath, content);
+    await fs.promises.rename(tmpPath, filePath);
+  } catch (e) {
+    await fs.promises.rm(tmpPath, { force: true });
+    throw e;
+  }
 }

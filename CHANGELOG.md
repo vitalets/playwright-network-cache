@@ -3,6 +3,7 @@
 > This project follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ## [Unreleased]
+* fix: write cache files atomically to avoid corrupted `headers.json` with parallel workers, re-fetch broken cache entries ([#10](https://github.com/vitalets/playwright-network-cache/issues/10)).
 
 ## [0.3.0] - 2026-05-12
 * fix: support Playwright 1.60+.
