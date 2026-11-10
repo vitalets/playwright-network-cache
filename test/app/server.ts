@@ -4,7 +4,7 @@ import path from 'path';
 import mime from 'mime-types';
 import timers from 'timers/promises';
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 export interface Cat {
   id: number;

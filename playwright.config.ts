@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
-const baseURL = 'http://localhost:3000';
+const PORT = 31379;
+const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: 'test',
@@ -15,6 +16,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npx ts-node test/app/server',
+    env: { PORT: String(PORT) },
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
