@@ -53,6 +53,30 @@ export class SyntheticApiResponse implements APIResponse {
     return JSON.parse(await this.text());
   }
 
+  // Cached responses have no connection metadata.
+  async securityDetails() {
+    return null;
+  }
+
+  async serverAddr() {
+    return null;
+  }
+
+  timing() {
+    // Match Playwright's unavailable timing values for HAR replay.
+    return {
+      startTime: -1,
+      domainLookupStart: -1,
+      domainLookupEnd: -1,
+      connectStart: -1,
+      secureConnectionStart: -1,
+      connectEnd: -1,
+      requestStart: -1,
+      responseStart: -1,
+      responseEnd: -1,
+    };
+  }
+
   async dispose() {}
   async [Symbol.asyncDispose]() {}
 }
