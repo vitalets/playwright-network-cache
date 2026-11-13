@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+* new release script.
+* update dependencies.
+
 ## [0.3.0] - 2026-05-12
 * fix: support Playwright 1.60+.
 * fix: await body write and write body before headers in saveResponse ([#9](https://github.com/vitalets/playwright-network-cache/pull/9)).
