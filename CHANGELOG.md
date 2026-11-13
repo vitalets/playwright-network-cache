@@ -3,6 +3,7 @@
 > This project follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ## [Unreleased]
+* fix: write `headers.json` atomically to avoid corrupted cache with parallel workers ([#10](https://github.com/vitalets/playwright-network-cache/issues/10)).
 
 * new release script.
 * update dependencies.

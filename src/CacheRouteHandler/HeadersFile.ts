@@ -30,7 +30,11 @@ export class HeadersFile {
 
   save(responseInfo: ResponseInfo) {
     this.ensureDir();
-    fs.writeFileSync(this.path, prettifyJson(responseInfo));
+    // Write to temp file + rename, so parallel workers never leave a half-overwritten file.
+    // See: https://github.com/vitalets/playwright-network-cache/issues/10
+    const tmpPath = `${this.path}.${process.pid}.tmp`;
+    fs.writeFileSync(tmpPath, prettifyJson(responseInfo));
+    fs.renameSync(tmpPath, this.path);
   }
 
   private ensureDir() {
